@@ -1,1 +1,1 @@
-Projeto pelmanager, desenvolvido em springboot.
+Projeto PELMANEGER, desenvolvido em springboot.
