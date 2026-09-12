@@ -1,6 +1,6 @@
 package com.pelmanager.dto;
 
-public record UsuarioRespondeDTO(
+public record UsuarioResponseDTO(
         Long id,
         String nome,
         String apelido,
