@@ -23,7 +23,7 @@ public class UsuarioService {
         usuario.setApelido(usuarioRequestDTO.apelido());
         usuario.setEmail(usuarioRequestDTO.email());
         usuario.setSenha(usuarioRequestDTO.senha());
-        usuario.setPeDominante(usuarioRequestDTO.peDominante());
+        usuario.setPernaDominante(usuarioRequestDTO.peDominante());
         usuario.setPosicaoPrimaria(usuarioRequestDTO.posicaoPrimaria());
         usuario.setPosicaoSecundaria(usuarioRequestDTO.posicaoSecundaria());
 
@@ -33,7 +33,7 @@ public class UsuarioService {
                 usuarioSalvo.getNome(),
                 usuarioSalvo.getApelido(),
                 usuarioSalvo.getEmail(),
-                usuarioSalvo.getPeDominante(),
+                usuarioSalvo.getPernaDominante(),
                 usuarioSalvo.getPosicaoPrimaria(),
                 usuarioSalvo.getPosicaoSecundaria()
         );

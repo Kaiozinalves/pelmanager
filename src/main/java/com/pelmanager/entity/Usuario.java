@@ -1,9 +1,9 @@
 package com.pelmanager.entity;
 
+import com.pelmanager.entity.enums.PernaDominante;
+import com.pelmanager.entity.enums.Posicao;
 import jakarta.persistence.*;
 import lombok.Data;
-
-import java.lang.reflect.Type;
 
 @Entity
 @Table(name = "usuarios")
@@ -24,12 +24,15 @@ public class Usuario {
     @Column(nullable = false)
     private String senha;
 
-    @Column(name = "pe_dominante", length = 4)
-    private String peDominante; // DIR, ESQ ou AMBI
+    @Enumerated(EnumType.STRING)
+    @Column(name = "perna_dominante", length = 10)
+    private PernaDominante pernaDominante;
 
-    @Column(name = "posicao_primaria", length = 3)
-    private String posicaoPrimaria; // ZAG, MEI, ATA ou GOL
+    @Enumerated(EnumType.STRING)
+    @Column(name = "posicao_primaria", length = 20)
+    private Posicao posicaoPrimaria; // ZAG, MEI, ATA ou GOL
 
-    @Column(name = "posicao_secundaria", length = 3)
-    private String posicaoSecundaria;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "posicao_secundaria", length = 20)
+    private Posicao posicaoSecundaria;
 }

@@ -1,11 +1,14 @@
 package com.pelmanager.dto;
 
+import com.pelmanager.entity.enums.PernaDominante;
+import com.pelmanager.entity.enums.Posicao;
+
 public record UsuarioRequestDTO(
         String nome,
         String apelido,
         String email,
         String senha,
-        String peDominante,
-        String posicaoPrimaria,
-        String posicaoSecundaria
+        PernaDominante peDominante,
+        Posicao posicaoPrimaria,
+        Posicao posicaoSecundaria
 ) {}
