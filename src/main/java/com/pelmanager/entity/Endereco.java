@@ -26,4 +26,9 @@ public class Endereco {
 
     @Column(length = 9)
     private String cep;
+
+    public String enderecoCompleto() {
+        return String.format("%s, %s - %s, %s - %s, CEP: %s",
+                this.logradouro, this.numero, this.bairro, this.cidade, this.estado, this.cep);
+    }
 }
