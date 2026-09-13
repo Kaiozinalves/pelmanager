@@ -3,7 +3,13 @@ package com.pelmanager.service;
 import com.pelmanager.dto.GrupoPeladaRequestDTO;
 import com.pelmanager.dto.GrupoPeladaResponseDTO;
 import com.pelmanager.entity.GrupoPelada;
+import com.pelmanager.entity.Participante;
+import com.pelmanager.entity.Usuario;
+// TODO: Lembre de importar o seu Enum aqui. Ex: import com.pelmanager.entity.enums.Papel;
+import com.pelmanager.entity.enums.Papel;
 import com.pelmanager.repository.GrupoPeladaRepository;
+import com.pelmanager.repository.ParticipanteRepository;
+import com.pelmanager.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -12,24 +18,41 @@ import java.util.UUID;
 
 @Service
 public class GrupoPeladaService {
-    private final GrupoPeladaRepository repository;
 
-    public GrupoPeladaService(GrupoPeladaRepository repository) {
-        this.repository = repository;
+    private final GrupoPeladaRepository grupoRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final ParticipanteRepository participanteRepository;
+
+    public GrupoPeladaService(GrupoPeladaRepository grupoRepository,
+                              UsuarioRepository usuarioRepository,
+                              ParticipanteRepository participanteRepository) {
+        this.grupoRepository = grupoRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.participanteRepository = participanteRepository;
     }
 
     @Transactional
     public GrupoPeladaResponseDTO criar(GrupoPeladaRequestDTO dto) {
+
+        // Impede que a pelada seja criada sem um dono válido
+        Usuario dono = usuarioRepository.findById(dto.fundadorId())
+                .orElseThrow(() -> new RuntimeException("Usuário criador não encontrado."));
+
         GrupoPelada grupo = new GrupoPelada();
         grupo.setNome(dto.nome());
-
-        // Gera um código de convite de 6 caracteres aleatórios
-        String codigoGerado = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
-        grupo.setCodigoConvite(codigoGerado);
-
+        grupo.setCodigoConvite(UUID.randomUUID().toString().substring(0, 6).toUpperCase());
         grupo.setDataCriacao(LocalDateTime.now());
 
-        GrupoPelada grupoSalvo = repository.save(grupo);
+        GrupoPelada grupoSalvo = grupoRepository.save(grupo);
+
+        // Gera o vinculo automaticamente
+        Participante admin = new Participante();
+        admin.setUsuario(dono);
+        admin.setGrupo(grupoSalvo);
+        admin.setPapel(Papel.ADMIN);
+        admin.setDataEntrada(LocalDateTime.now());
+
+        participanteRepository.save(admin);
 
         return new GrupoPeladaResponseDTO(
                 grupoSalvo.getId(),

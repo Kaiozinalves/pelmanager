@@ -5,6 +5,8 @@ import com.pelmanager.entity.enums.Posicao;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Table(name = "usuarios")
 @Data
@@ -23,6 +25,9 @@ public class Usuario {
 
     @Column(nullable = false)
     private String senha;
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
+    private List<Participante> gruposQueParticipa;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "perna_dominante", length = 10)

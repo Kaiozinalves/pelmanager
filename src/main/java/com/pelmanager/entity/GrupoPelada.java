@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "grupo_peladas")
@@ -16,6 +17,9 @@ public class GrupoPelada {
 
     @Column(nullable = false)
     private String nome;
+
+    @OneToMany(mappedBy = "grupo", cascade = CascadeType.ALL)
+    private List<Participante> participantes;
 
     private String codigoConvite;
 
