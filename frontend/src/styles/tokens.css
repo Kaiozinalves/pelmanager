@@ -1,0 +1,88 @@
+:root {
+  /* Cor */
+  --cor-grama: #1E5631;
+  --cor-grama-escura: #143D22;
+  --cor-giz: #EEF1EA;
+  --cor-giz-forte: #E1E6DB;
+  --cor-tinta: #16211C;
+  --cor-tinta-suave: #4C594F;
+  --cor-ouro: #E8A93D;
+  --cor-ouro-escuro: #C88A22;
+  --cor-erro: #B23A3A;
+  --cor-linha: #C9D2C4;
+  --cor-branco: #FFFFFF;
+
+  /* Tipografia */
+  --fonte-display: "Barlow Condensed", sans-serif;
+  --fonte-corpo: "Inter", sans-serif;
+
+  /* Espaçamento */
+  --espaco-1: 4px;
+  --espaco-2: 8px;
+  --espaco-3: 12px;
+  --espaco-4: 16px;
+  --espaco-5: 24px;
+  --espaco-6: 32px;
+  --espaco-7: 48px;
+  --espaco-8: 64px;
+
+  /* Borda */
+  --raio-pequeno: 4px;
+  --raio-medio: 8px;
+
+  /* Sombra (usada com moderação) */
+  --sombra-painel: 0 2px 0 var(--cor-linha);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--fonte-corpo);
+  background: var(--cor-giz);
+  color: var(--cor-tinta);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--fonte-display);
+  font-weight: 700;
+  line-height: 1.05;
+  margin: 0;
+  letter-spacing: 0.2px;
+}
+
+p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+button {
+  font-family: var(--fonte-corpo);
+}
+
+a {
+  color: var(--cor-grama);
+}
+
+/* Foco visível para acessibilidade de teclado */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--cor-ouro-escuro);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

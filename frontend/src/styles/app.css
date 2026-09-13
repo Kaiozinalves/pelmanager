@@ -1,0 +1,331 @@
+/* ---------- Marca ---------- */
+.marca {
+  font-family: var(--fonte-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--cor-giz);
+  letter-spacing: 0.5px;
+}
+
+.marca--escura {
+  color: var(--cor-grama);
+}
+
+/* ---------- Layout de autenticação (login / cadastro) ---------- */
+.auth-layout {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+}
+
+.auth-painel {
+  background: var(--cor-grama-escura);
+  background-image: linear-gradient(180deg, var(--cor-grama) 0%, var(--cor-grama-escura) 65%);
+  color: var(--cor-giz);
+  padding: var(--espaco-7) var(--espaco-6);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-painel-conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+  max-width: 360px;
+}
+
+.auth-frase {
+  font-size: 44px;
+  color: var(--cor-giz);
+}
+
+.auth-descricao {
+  color: var(--cor-giz);
+  opacity: 0.85;
+  font-size: 15px;
+  max-width: 320px;
+}
+
+.grafico-campo {
+  position: absolute;
+  right: -60px;
+  bottom: -60px;
+  width: 320px;
+  height: 320px;
+}
+
+.auth-form-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--espaco-6);
+  background: var(--cor-giz);
+}
+
+.auth-form-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-titulo {
+  font-size: 34px;
+  color: var(--cor-tinta);
+  margin-bottom: var(--espaco-1);
+}
+
+.auth-subtitulo {
+  color: var(--cor-tinta-suave);
+  margin-bottom: var(--espaco-5);
+}
+
+.auth-rodape {
+  margin-top: var(--espaco-4);
+  font-size: 14px;
+  color: var(--cor-tinta-suave);
+}
+
+.auth-rodape a {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-rodape a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Formulários ---------- */
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.formulario-linha {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--espaco-4);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.campo-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cor-tinta-suave);
+}
+
+.campo-input {
+  border: 1.5px solid var(--cor-linha);
+  border-radius: var(--raio-pequeno);
+  padding: 10px var(--espaco-3);
+  font-size: 15px;
+  color: var(--cor-tinta);
+  background: var(--cor-branco);
+  transition: border-color 120ms ease;
+}
+
+.campo-input:focus {
+  border-color: var(--cor-grama);
+}
+
+.campo-erro {
+  font-size: 13px;
+  color: var(--cor-erro);
+}
+
+/* ---------- Botões ---------- */
+.botao {
+  border: none;
+  border-radius: var(--raio-pequeno);
+  padding: 12px var(--espaco-5);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 120ms ease, transform 80ms ease;
+}
+
+.botao:active {
+  transform: translateY(1px);
+}
+
+.botao:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.botao--primario {
+  background: var(--cor-grama);
+  color: var(--cor-giz);
+}
+
+.botao--primario:hover:not(:disabled) {
+  background: var(--cor-grama-escura);
+}
+
+.botao--secundario {
+  background: transparent;
+  color: var(--cor-grama-escura);
+  border: 1.5px solid var(--cor-grama);
+}
+
+.botao--secundario:hover:not(:disabled) {
+  background: var(--cor-giz-forte);
+}
+
+.link-simples {
+  background: none;
+  border: none;
+  color: var(--cor-tinta-suave);
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+/* ---------- Mensagens ---------- */
+.mensagem-erro {
+  font-size: 14px;
+  color: var(--cor-erro);
+  background: #F5E4E4;
+  border-left: 3px solid var(--cor-erro);
+  padding: var(--espaco-3);
+  border-radius: var(--raio-pequeno);
+}
+
+.mensagem-sucesso {
+  font-size: 14px;
+  color: var(--cor-grama-escura);
+  background: #E4EEE4;
+  border-left: 3px solid var(--cor-grama);
+  padding: var(--espaco-3);
+  border-radius: var(--raio-pequeno);
+}
+
+.texto-suave {
+  color: var(--cor-tinta-suave);
+  font-size: 14px;
+}
+
+/* ---------- Home ---------- */
+.home {
+  min-height: 100vh;
+}
+
+.home-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--espaco-4) var(--espaco-6);
+  border-bottom: 2px solid var(--cor-tinta);
+  background: var(--cor-giz);
+}
+
+.home-header-usuario {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-4);
+  font-size: 14px;
+  color: var(--cor-tinta-suave);
+}
+
+.home-conteudo {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--espaco-6);
+  padding: var(--espaco-6);
+  max-width: 1100px;
+  margin: 0 auto;
+  align-items: start;
+}
+
+.painel-coluna {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-5);
+}
+
+.painel {
+  background: var(--cor-branco);
+  border: 1.5px solid var(--cor-linha);
+  border-radius: var(--raio-medio);
+  padding: var(--espaco-5);
+}
+
+.texto-suave--nota {
+  margin-top: var(--espaco-4);
+  padding-top: var(--espaco-4);
+  border-top: 1px dashed var(--cor-linha);
+}
+
+.painel-titulo {
+  font-size: 24px;
+  color: var(--cor-tinta);
+  margin-bottom: var(--espaco-4);
+}
+
+.estado-vazio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  padding: var(--espaco-4) 0;
+}
+
+.lista-grupos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.item-grupo {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--espaco-3);
+  border: 1px solid var(--cor-linha);
+  border-radius: var(--raio-pequeno);
+}
+
+.item-grupo-nome {
+  font-weight: 600;
+}
+
+.item-grupo-local {
+  color: var(--cor-tinta-suave);
+  font-size: 14px;
+}
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 860px) {
+  .auth-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-painel {
+    padding: var(--espaco-6) var(--espaco-5) var(--espaco-7);
+  }
+
+  .auth-frase {
+    font-size: 34px;
+  }
+
+  .grafico-campo {
+    display: none;
+  }
+
+  .formulario-linha {
+    grid-template-columns: 1fr;
+  }
+
+  .home-conteudo {
+    grid-template-columns: 1fr;
+  }
+}

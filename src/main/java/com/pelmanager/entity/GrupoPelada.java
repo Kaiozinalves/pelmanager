@@ -25,5 +25,9 @@ public class GrupoPelada {
 
     private LocalDateTime dataCriacao;
 
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "endereco_id")
+    private Endereco endereco;
+
 
 }
