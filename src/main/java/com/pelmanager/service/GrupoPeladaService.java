@@ -2,7 +2,7 @@ package com.pelmanager.service;
 
 import com.pelmanager.dto.EnderecoResponseDTO;
 import com.pelmanager.dto.EntrarGrupoPeladaRequestDTO;
-import com.pelmanager.dto.GrupoPeladaRequestDTO;
+import com.pelmanager.dto.request.GrupoPeladaRequestDTO;
 import com.pelmanager.dto.GrupoPeladaResponseDTO;
 import com.pelmanager.entity.Endereco;
 import com.pelmanager.entity.GrupoPelada;

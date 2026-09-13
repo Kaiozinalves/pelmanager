@@ -1,6 +1,7 @@
 package com.pelmanager.controller;
 
-import com.pelmanager.dto.UsuarioRequestDTO;
+import com.pelmanager.dto.request.LoginRequestDTO;
+import com.pelmanager.dto.request.UsuarioRequestDTO;
 import com.pelmanager.dto.UsuarioResponseDTO;
 import com.pelmanager.service.UsuarioService;
 import org.springframework.http.HttpStatus;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
 
-    //injecao de dependencia
     private final UsuarioService usuarioService;
 
     public UsuarioController(UsuarioService usuarioService) {
@@ -24,9 +24,12 @@ public class UsuarioController {
     @PostMapping
     public ResponseEntity<UsuarioResponseDTO> cadastrar(@RequestBody UsuarioRequestDTO dto) {
         var response = usuarioService.cadastrarUsuario(dto);
-        //Devolve a resposta pronta com o código HTTP 201 (Created)
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-
+    @PostMapping("/login")
+    public ResponseEntity<UsuarioResponseDTO> autenticar(@RequestBody LoginRequestDTO dto) {
+        var usuario = usuarioService.autenticar(dto);
+        return ResponseEntity.ok(usuario);
+    }
 }

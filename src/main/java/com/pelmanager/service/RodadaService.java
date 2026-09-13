@@ -1,6 +1,6 @@
 package com.pelmanager.service;
 
-import com.pelmanager.dto.RodadaRequestDTO;
+import com.pelmanager.dto.request.RodadaRequestDTO;
 import com.pelmanager.entity.GrupoPelada;
 import com.pelmanager.entity.Rodada;
 import com.pelmanager.entity.enums.StatusRodada;

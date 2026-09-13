@@ -1,7 +1,5 @@
 package com.pelmanager.dto;
 
-import lombok.Data;
-
 import java.time.LocalDateTime;
 
 

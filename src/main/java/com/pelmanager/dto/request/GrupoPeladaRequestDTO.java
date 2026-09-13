@@ -1,6 +1,4 @@
-package com.pelmanager.dto;
-
-import lombok.Data;
+package com.pelmanager.dto.request;
 
 
 public record GrupoPeladaRequestDTO(String nome,

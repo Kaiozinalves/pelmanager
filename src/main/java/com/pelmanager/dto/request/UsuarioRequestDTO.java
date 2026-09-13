@@ -1,8 +1,7 @@
-package com.pelmanager.dto;
+package com.pelmanager.dto.request;
 
 import com.pelmanager.entity.enums.PernaDominante;
 import com.pelmanager.entity.enums.Posicao;
-import lombok.Data;
 
 
 public record UsuarioRequestDTO(

@@ -1,7 +1,7 @@
 package com.pelmanager.controller;
 
 import com.pelmanager.dto.EntrarGrupoPeladaRequestDTO;
-import com.pelmanager.dto.GrupoPeladaRequestDTO;
+import com.pelmanager.dto.request.GrupoPeladaRequestDTO;
 import com.pelmanager.dto.GrupoPeladaResponseDTO;
 import com.pelmanager.service.GrupoPeladaService;
 import org.springframework.http.HttpStatus;

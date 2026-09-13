@@ -1,4 +1,4 @@
-package com.pelmanager.dto;
+package com.pelmanager.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 

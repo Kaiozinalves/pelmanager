@@ -1,6 +1,6 @@
 package com.pelmanager.controller;
 
-import com.pelmanager.dto.RodadaRequestDTO;
+import com.pelmanager.dto.request.RodadaRequestDTO;
 import com.pelmanager.service.RodadaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

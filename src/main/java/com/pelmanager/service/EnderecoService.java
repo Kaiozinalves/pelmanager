@@ -1,6 +1,6 @@
 package com.pelmanager.service;
 
-import com.pelmanager.dto.EnderecoRequestDTO;
+import com.pelmanager.dto.request.EnderecoRequestDTO;
 import com.pelmanager.entity.Endereco;
 import com.pelmanager.repository.EnderecoRepository;
 import jakarta.transaction.Transactional;

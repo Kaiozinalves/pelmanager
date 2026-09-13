@@ -1,6 +1,7 @@
 package com.pelmanager.service;
 
-import com.pelmanager.dto.UsuarioRequestDTO;
+import com.pelmanager.dto.request.LoginRequestDTO;
+import com.pelmanager.dto.request.UsuarioRequestDTO;
 import com.pelmanager.dto.UsuarioResponseDTO;
 import com.pelmanager.entity.Usuario;
 import com.pelmanager.repository.UsuarioRepository;
@@ -36,6 +37,25 @@ public class UsuarioService {
                 usuarioSalvo.getPernaDominante(),
                 usuarioSalvo.getPosicaoPrimaria(),
                 usuarioSalvo.getPosicaoSecundaria()
+        );
+    }
+
+    public UsuarioResponseDTO autenticar(LoginRequestDTO dto) {
+        Usuario usuario = usuarioRepository.findByEmail(dto.email())
+                .orElseThrow(() -> new RuntimeException("E-mail não cadastrado."));
+
+        if (!usuario.getSenha().equals(dto.senha())) {
+            throw new RuntimeException("Senha incorreta.");
+        }
+
+        return new UsuarioResponseDTO(
+                usuario.getId(),
+                usuario.getNome(),
+                usuario.getApelido(),
+                usuario.getEmail(),
+                usuario.getPernaDominante(),
+                usuario.getPosicaoPrimaria(),
+                usuario.getPosicaoSecundaria()
         );
     }
 }
