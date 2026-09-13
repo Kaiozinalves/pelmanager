@@ -1,6 +1,7 @@
 package com.pelmanager.dto;
 
-public record EnderecoRequestDTO(
+public record EnderecoResponseDTO(
+        Long id,
         String logradouro,
         String numero,
         String bairro,

@@ -8,5 +8,7 @@ import java.time.LocalDateTime;
 public record GrupoPeladaResponseDTO(Long id,
                                      String nome,
                                      String codigoConvite,
-                                     LocalDateTime dataCriacao) {
+                                     LocalDateTime dataCriacao,
+                                     EnderecoResponseDTO endereco
+                                        ) {
 }

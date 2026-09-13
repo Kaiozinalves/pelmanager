@@ -1,8 +1,10 @@
 package com.pelmanager.service;
 
+import com.pelmanager.dto.EnderecoResponseDTO;
 import com.pelmanager.dto.EntrarGrupoPeladaRequestDTO;
 import com.pelmanager.dto.GrupoPeladaRequestDTO;
 import com.pelmanager.dto.GrupoPeladaResponseDTO;
+import com.pelmanager.entity.Endereco;
 import com.pelmanager.entity.GrupoPelada;
 import com.pelmanager.entity.Participante;
 import com.pelmanager.entity.Usuario;
@@ -39,10 +41,19 @@ public class GrupoPeladaService {
         Usuario dono = usuarioRepository.findById(dto.fundadorId())
                 .orElseThrow(() -> new RuntimeException("Usuário criador não encontrado."));
 
+        Endereco endereco = new Endereco();
+        endereco.setLogradouro(dto.endereco().logradouro());
+        endereco.setNumero(dto.endereco().numero());
+        endereco.setBairro(dto.endereco().bairro());
+        endereco.setCidade(dto.endereco().cidade());
+        endereco.setEstado(dto.endereco().estado());
+        endereco.setCep(dto.endereco().cep());
+
         GrupoPelada grupo = new GrupoPelada();
         grupo.setNome(dto.nome());
         grupo.setCodigoConvite(UUID.randomUUID().toString().substring(0, 6).toUpperCase());
         grupo.setDataCriacao(LocalDateTime.now());
+        grupo.setEndereco(endereco);
 
         GrupoPelada grupoSalvo = grupoRepository.save(grupo);
 
@@ -59,7 +70,16 @@ public class GrupoPeladaService {
                 grupoSalvo.getId(),
                 grupoSalvo.getNome(),
                 grupoSalvo.getCodigoConvite(),
-                grupoSalvo.getDataCriacao()
+                grupoSalvo.getDataCriacao(),
+                new EnderecoResponseDTO(
+                        grupoSalvo.getEndereco().getId(),
+                        grupoSalvo.getEndereco().getLogradouro(),
+                        grupoSalvo.getEndereco().getNumero(),
+                        grupoSalvo.getEndereco().getBairro(),
+                        grupoSalvo.getEndereco().getCidade(),
+                        grupoSalvo.getEndereco().getEstado(),
+                        grupoSalvo.getEndereco().getCep()
+                )
         );
     }
 
