@@ -4,6 +4,7 @@ import com.pelmanager.dto.RodadaRequestDTO;
 import com.pelmanager.entity.GrupoPelada;
 import com.pelmanager.entity.Rodada;
 import com.pelmanager.entity.enums.StatusRodada;
+import com.pelmanager.repository.EnderecoRepository;
 import com.pelmanager.repository.GrupoPeladaRepository;
 import com.pelmanager.repository.RodadaRepository;
 import jakarta.transaction.Transactional;
@@ -13,10 +14,12 @@ import org.springframework.stereotype.Service;
 public class RodadaService {
     private final RodadaRepository rodadaRepository;
     private final GrupoPeladaRepository grupoPeladaRepository;
+    private final EnderecoRepository enderecoRepository;
 
-    public RodadaService(RodadaRepository rodadaRepository, GrupoPeladaRepository grupoPeladaRepository) {
+    public RodadaService(RodadaRepository rodadaRepository, GrupoPeladaRepository grupoPeladaRepository, EnderecoRepository enderecoRepository) {
         this.rodadaRepository = rodadaRepository;
         this.grupoPeladaRepository = grupoPeladaRepository;
+        this.enderecoRepository = enderecoRepository;
     }
 
     @Transactional
@@ -29,6 +32,11 @@ public class RodadaService {
         novaRodada.setDataRodada(dto.data());
         novaRodada.setHoraRodada(dto.horario());
         novaRodada.setStatusRodada(StatusRodada.AGENDADA); // Regra de negócio aplicada diretamente
+
+        if (dto.enderecoAlternativoId() != null) {
+            novaRodada.setEnderecoAlternativo(enderecoRepository.findById(dto.enderecoAlternativoId())
+                    .orElseThrow(() -> new RuntimeException("Endereço alternativo não encontrado.")));
+        }
 
         rodadaRepository.save(novaRodada);
     }

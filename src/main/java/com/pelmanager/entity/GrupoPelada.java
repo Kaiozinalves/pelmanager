@@ -25,5 +25,9 @@ public class GrupoPelada {
 
     private LocalDateTime dataCriacao;
 
+    @ManyToOne
+    @JoinColumn(name = "endereco_id")
+    private Endereco endereco;
+
 
 }

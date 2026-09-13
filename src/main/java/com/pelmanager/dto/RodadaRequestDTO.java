@@ -9,5 +9,6 @@ public record RodadaRequestDTO(Long grupoId,
                                @JsonFormat(pattern = "HH:mm")
                                LocalTime horario,
                                @JsonFormat(pattern = "yyyy-MM-dd")
-                               LocalDate data) {
+                               LocalDate data,
+                               Long enderecoAlternativoId) {
 }

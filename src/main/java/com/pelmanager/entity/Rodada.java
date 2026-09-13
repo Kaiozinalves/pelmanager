@@ -25,6 +25,17 @@ public class Rodada {
     @Enumerated(EnumType.STRING)
     StatusRodada statusRodada;
 
+    @ManyToOne
+    @JoinColumn(name = "enderecoAlternativo_id")
+    private Endereco enderecoAlternativo;
+    //Se o endereçoAlternativo for nulo, a rodada será realizada no endereço do grupo
+    public Endereco getEnderecoResolvido() {
+        if (this.enderecoAlternativo != null) {
+            return this.enderecoAlternativo;
+        }
+        return this.grupo.getEndereco();
+    }
+
     //A rodada inicia quando o checkin é encerrado
     public boolean estaAberta() {
         return this.statusRodada != null && this.statusRodada.permiteCheckin();
