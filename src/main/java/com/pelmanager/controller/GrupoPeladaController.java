@@ -1,5 +1,6 @@
 package com.pelmanager.controller;
 
+import com.pelmanager.dto.EntrarGrupoPeladaRequestDTO;
 import com.pelmanager.dto.GrupoPeladaRequestDTO;
 import com.pelmanager.dto.GrupoPeladaResponseDTO;
 import com.pelmanager.service.GrupoPeladaService;
@@ -23,5 +24,11 @@ public class GrupoPeladaController {
     public ResponseEntity<GrupoPeladaResponseDTO> criar(@RequestBody GrupoPeladaRequestDTO dto) {
         GrupoPeladaResponseDTO response = service.criar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/entrar")
+    public ResponseEntity<Void> entrarNoGrupo(@RequestBody EntrarGrupoPeladaRequestDTO dto) {
+        service.entrarNoGrupo(dto);
+        return ResponseEntity.ok().build();
     }
 }

@@ -1,5 +1,6 @@
 package com.pelmanager.service;
 
+import com.pelmanager.dto.EntrarGrupoPeladaRequestDTO;
 import com.pelmanager.dto.GrupoPeladaRequestDTO;
 import com.pelmanager.dto.GrupoPeladaResponseDTO;
 import com.pelmanager.entity.GrupoPelada;
@@ -61,4 +62,28 @@ public class GrupoPeladaService {
                 grupoSalvo.getDataCriacao()
         );
     }
+
+    @Transactional
+    public void entrarNoGrupo(EntrarGrupoPeladaRequestDTO dto) {
+
+        Usuario jogador = usuarioRepository.findById(dto.IdUsuario())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+
+        GrupoPelada grupo = grupoRepository.findByCodigoConvite(dto.codigoConvite())
+                .orElseThrow(() -> new RuntimeException("Código de convite inválido ou grupo não existe."));
+
+
+        if (participanteRepository.existsByUsuarioIdAndGrupoId(jogador.getId(), grupo.getId())) {
+            throw new RuntimeException("Você já participa deste grupo!");
+        }
+
+        Participante novoParticipante = new Participante();
+        novoParticipante.setUsuario(jogador);
+        novoParticipante.setGrupo(grupo);
+        novoParticipante.setPapel(Papel.MEMBRO);
+        novoParticipante.setDataEntrada(LocalDateTime.now());
+
+        participanteRepository.save(novoParticipante);
+    }
+
 }
