@@ -31,11 +31,15 @@ public class RodadaService {
         novaRodada.setGrupo(grupo);
         novaRodada.setDataRodada(dto.data());
         novaRodada.setHoraRodada(dto.horario());
-        novaRodada.setStatusRodada(StatusRodada.AGENDADA); // Regra de negócio aplicada diretamente
+        novaRodada.setStatusRodada(StatusRodada.AGENDADA);
 
+        // Verifica se foi passado um endereço diferente
         if (dto.enderecoAlternativoId() != null) {
             novaRodada.setEnderecoAlternativo(enderecoRepository.findById(dto.enderecoAlternativoId())
                     .orElseThrow(() -> new RuntimeException("Endereço alternativo não encontrado.")));
+        } else {
+            // Se não foi passado, grava fisicamente o endereço oficial do grupo na rodada
+            novaRodada.setEnderecoAlternativo(grupo.getEndereco());
         }
 
         rodadaRepository.save(novaRodada);
