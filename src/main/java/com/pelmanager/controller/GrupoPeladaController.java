@@ -1,6 +1,7 @@
 package com.pelmanager.controller;
 
 import com.pelmanager.dto.EntrarGrupoPeladaRequestDTO;
+import com.pelmanager.dto.GrupoPeladaDetalhesResponseDTO;
 import com.pelmanager.dto.request.GrupoPeladaRequestDTO;
 import com.pelmanager.dto.GrupoPeladaResponseDTO;
 import com.pelmanager.service.GrupoPeladaService;
@@ -36,6 +37,11 @@ public class GrupoPeladaController {
         var grupos = service.listarPeladasDoUsuario(usuarioId);
 
         return ResponseEntity.ok(grupos);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<GrupoPeladaDetalhesResponseDTO> buscarDetalhes(@PathVariable Long id) {
+        return ResponseEntity.ok(service.buscarDetalhes(id));
     }
 }
 

@@ -1,9 +1,7 @@
 package com.pelmanager.service;
 
-import com.pelmanager.dto.EnderecoResponseDTO;
-import com.pelmanager.dto.EntrarGrupoPeladaRequestDTO;
+import com.pelmanager.dto.*;
 import com.pelmanager.dto.request.GrupoPeladaRequestDTO;
-import com.pelmanager.dto.GrupoPeladaResponseDTO;
 import com.pelmanager.entity.Endereco;
 import com.pelmanager.entity.GrupoPelada;
 import com.pelmanager.entity.Participante;
@@ -136,6 +134,29 @@ public class GrupoPeladaService {
                     );
                 })
                 .toList();
+    }
+    public GrupoPeladaDetalhesResponseDTO buscarDetalhes(Long id) {
+        GrupoPelada grupo = grupoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pelada não encontrada."));
+
+        List<ParticipanteResponseDTO> participantes = grupo.getParticipantes().stream()
+                .map(participante -> new ParticipanteResponseDTO(
+                        participante.getId(),
+                        participante.getUsuario().getId(),
+                        participante.getUsuario().getNome(),
+                        participante.getUsuario().getApelido(),
+                        participante.getPapel(),
+                        participante.getDataEntrada()
+                ))
+                .toList();
+
+        return new GrupoPeladaDetalhesResponseDTO(
+                grupo.getId(),
+                grupo.getNome(),
+                grupo.getCodigoConvite(),
+                grupo.getDataCriacao(),
+                participantes
+        );
     }
 
 }
