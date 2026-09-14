@@ -17,10 +17,7 @@ export async function entrarNoGrupo({ idUsuario, codigoConvite }) {
   });
 }
 
-// ATENÇÃO: esse endpoint ainda não existe no backend (não há GET em
-// GrupoPeladaController). Enquanto não existir, a Home trata o erro como
-// lista vazia — não quebra a tela, só não mostra nada.
-export async function listarMeusGrupos() {
-  const { data } = await api.get("/grupos/meus");
+export async function listarMeusGrupos(usuarioId) {
+  const { data } = await api.get(`/grupos/meus?usuarioId=${usuarioId}`);
   return data;
 }

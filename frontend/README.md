@@ -35,60 +35,24 @@ src/
 | Cadastro                      | `POST /api/usuarios`     | ✅ existe          |
 | Criar pelada                  | `POST /api/grupos`       | ✅ existe          |
 | Entrar com código de convite  | `POST /api/grupos/entrar`| ✅ existe          |
-| Login                         | `POST /api/usuarios/login` | ❌ não existe    |
+| Login                         | `POST /api/usuarios/login` | ✅ existe        |
 | Listar minhas peladas         | `GET /api/grupos/meus`   | ❌ não existe      |
 
-## Sobre o login (importante)
+## Sobre o login
 
-Seu backend ainda não tem nenhum mecanismo de autenticação (sem Spring
-Security, sem JWT, sem endpoint de login). Por isso, o fluxo atual do
-frontend é:
+O backend já tem o endpoint de autenticação implementado em
+`POST /api/usuarios/login`.
 
-- **Cadastro já loga automaticamente.** O backend devolve o `UsuarioResponseDTO`
-  completo (com `id`), então guardo isso no `localStorage` e mando direto
-  pra Home — sem precisar de um segundo passo de login.
-- **A tela de Login existe na interface**, mas vai dar erro até você criar
-  o endpoint. Se quiser algo rápido pra destravar (sem Spring Security de
-  verdade ainda), dá pra adicionar isso no `UsuarioService`:
+O frontend usa esse fluxo assim:
 
-  ```java
-  public UsuarioResponseDTO login(String email, String senha) {
-      Usuario usuario = usuarioRepository.findByEmail(email)
-              .orElseThrow(() -> new RuntimeException("E-mail ou senha inválidos."));
+- faz a requisição com `email` e `senha`;
+- salva o `UsuarioResponseDTO` em `localStorage`;
+- redireciona para a Home;
+- envia o `pelada_token` em todas as chamadas, quando existir.
 
-      if (!usuario.getSenha().equals(senha)) {
-          throw new RuntimeException("E-mail ou senha inválidos.");
-      }
-
-      return new UsuarioResponseDTO(
-              usuario.getId(), usuario.getNome(), usuario.getApelido(),
-              usuario.getEmail(), usuario.getPernaDominante(),
-              usuario.getPosicaoPrimaria(), usuario.getPosicaoSecundaria()
-      );
-  }
-  ```
-
-  Precisa também de `findByEmail` no `UsuarioRepository`:
-  ```java
-  Optional<Usuario> findByEmail(String email);
-  ```
-
-  E o endpoint no `UsuarioController`:
-  ```java
-  public record LoginRequestDTO(String email, String senha) {}
-
-  @PostMapping("/login")
-  public ResponseEntity<UsuarioResponseDTO> login(@RequestBody LoginRequestDTO dto) {
-      return ResponseEntity.ok(usuarioService.login(dto.email(), dto.senha()));
-  }
-  ```
-
-  ⚠️ **Isso NÃO é seguro** — compara a senha em texto puro (seu `Usuario`
-  também salva a senha sem hash nenhum hoje). Serve só pra destravar o
-  fluxo de demonstração da sprint. Antes de qualquer coisa em produção,
-  isso precisa de hash de senha (`BCryptPasswordEncoder`) e, idealmente,
-  Spring Security com JWT — mas isso é assunto pra uma sprint futura de
-  autenticação, não algo pra resolver agora.
+Ainda vale lembrar que a autenticação atual é uma implementação de sprint,
+sem hash de senha e sem JWT real. Isso é suficiente para rodar a demo, mas
+precisa ser substituído por uma estratégia segura em produção.
 
 ## Criar pelada
 

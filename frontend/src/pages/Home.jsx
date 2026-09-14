@@ -33,24 +33,32 @@ export function Home() {
 
   useEffect(() => {
     let ativo = true;
-    listarMeusGrupos()
-      .then((dados) => {
+
+    async function carregar() {
+      if (!usuario?.id) {
+        setCarregandoGrupos(false);
+        setListaVemDoServidor(false);
+        return;
+      }
+
+      try {
+        const dados = await listarMeusGrupos(usuario.id);
         if (!ativo) return;
-        setGrupos(dados);
+        setGrupos(dados || []);
         setListaVemDoServidor(true);
-      })
-      .catch(() => {
-        // GET /grupos/meus ainda não existe no backend — mantém a lista
-        // só com o que acontecer nesta sessão (ver criarGrupo/entrarNoGrupo).
+      } catch (err) {
         if (ativo) setListaVemDoServidor(false);
-      })
-      .finally(() => {
+      } finally {
         if (ativo) setCarregandoGrupos(false);
-      });
+      }
+    }
+
+    carregar();
+
     return () => {
       ativo = false;
     };
-  }, []);
+  }, [usuario]);
 
   function atualizarEndereco(campo, valor) {
     setEndereco((atual) => ({ ...atual, [campo]: valor }));

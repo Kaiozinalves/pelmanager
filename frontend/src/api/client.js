@@ -11,6 +11,16 @@ export const api = axios.create({
   },
 });
 
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("pelada_token");
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
+
 // O backend ainda não tem autenticação (sem Spring Security / JWT até
 // agora), então não existe token pra anexar nas requisições. Quando você
 // implementar login de verdade, descomenta o interceptor abaixo:

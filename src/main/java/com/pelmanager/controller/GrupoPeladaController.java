@@ -6,10 +6,9 @@ import com.pelmanager.dto.GrupoPeladaResponseDTO;
 import com.pelmanager.service.GrupoPeladaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/grupos")
@@ -31,4 +30,13 @@ public class GrupoPeladaController {
         service.entrarNoGrupo(dto);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/meus")
+    public ResponseEntity<List<GrupoPeladaResponseDTO>> listarMeusGrupos(@RequestParam Long usuarioId) {
+        var grupos = service.listarPeladasDoUsuario(usuarioId);
+
+        return ResponseEntity.ok(grupos);
+    }
 }
+
+

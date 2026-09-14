@@ -17,6 +17,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -104,6 +105,37 @@ public class GrupoPeladaService {
         novoParticipante.setDataEntrada(LocalDateTime.now());
 
         participanteRepository.save(novoParticipante);
+    }
+
+    public List<GrupoPeladaResponseDTO> listarPeladasDoUsuario(Long usuarioId) {
+        List<GrupoPelada> grupos = grupoRepository.findByUsuarioId(usuarioId);
+
+        return grupos.stream()
+                .map(grupo -> {
+                    // 1. Prepara o DTO de endereço (com verificação para evitar erro se o grupo não tiver quadra)
+                    EnderecoResponseDTO enderecoDTO = null;
+                    if (grupo.getEndereco() != null) {
+                        enderecoDTO = new EnderecoResponseDTO(
+                                grupo.getEndereco().getId(),
+                                grupo.getEndereco().getLogradouro(),
+                                grupo.getEndereco().getNumero(),
+                                grupo.getEndereco().getBairro(),
+                                grupo.getEndereco().getCidade(),
+                                grupo.getEndereco().getEstado(),
+                                grupo.getEndereco().getCep()
+                        );
+                    }
+
+                    // 2. Retorna o DTO do Grupo
+                    return new GrupoPeladaResponseDTO(
+                            grupo.getId(),
+                            grupo.getNome(),
+                            grupo.getCodigoConvite(),
+                            grupo.getDataCriacao(),
+                            enderecoDTO
+                    );
+                })
+                .toList();
     }
 
 }
