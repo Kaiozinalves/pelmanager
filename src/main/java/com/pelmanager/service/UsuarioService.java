@@ -3,6 +3,7 @@ package com.pelmanager.service;
 import com.pelmanager.dto.request.LoginRequestDTO;
 import com.pelmanager.dto.request.UsuarioRequestDTO;
 import com.pelmanager.dto.UsuarioResponseDTO;
+import com.pelmanager.dto.request.UsuarioUpdateRequestDTO;
 import com.pelmanager.entity.Usuario;
 import com.pelmanager.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
@@ -56,6 +57,44 @@ public class UsuarioService {
                 usuario.getPernaDominante(),
                 usuario.getPosicaoPrimaria(),
                 usuario.getPosicaoSecundaria()
+        );
+    }
+    public UsuarioResponseDTO buscarPorId(Long id) {
+        var usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+
+        return new UsuarioResponseDTO(
+                usuario.getId(),
+                usuario.getNome(),
+                usuario.getApelido(),
+                usuario.getEmail(),
+                usuario.getPernaDominante(),
+                usuario.getPosicaoPrimaria(),
+                usuario.getPosicaoSecundaria()
+        );
+    }
+
+    @Transactional
+    public UsuarioResponseDTO atualizarUsuario(Long id, UsuarioUpdateRequestDTO dto) {
+        var usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+
+        usuario.setNome(dto.nome());
+        usuario.setApelido(dto.apelido());
+        usuario.setPernaDominante(dto.peDominante());
+        usuario.setPosicaoPrimaria(dto.posicaoPrimaria());
+        usuario.setPosicaoSecundaria(dto.posicaoSecundaria());
+
+        var usuarioAtualizado = usuarioRepository.save(usuario);
+
+        return new UsuarioResponseDTO(
+                usuarioAtualizado.getId(),
+                usuarioAtualizado.getNome(),
+                usuarioAtualizado.getApelido(),
+                usuarioAtualizado.getEmail(),
+                usuarioAtualizado.getPernaDominante(),
+                usuarioAtualizado.getPosicaoPrimaria(),
+                usuarioAtualizado.getPosicaoSecundaria()
         );
     }
 }
