@@ -5,6 +5,7 @@ import com.pelmanager.dto.request.UsuarioRequestDTO;
 import com.pelmanager.dto.UsuarioResponseDTO;
 import com.pelmanager.dto.request.UsuarioUpdateRequestDTO;
 import com.pelmanager.entity.Usuario;
+import com.pelmanager.exception.EmailJaCadastradoException;
 import com.pelmanager.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,11 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioResponseDTO cadastrarUsuario(UsuarioRequestDTO usuarioRequestDTO){
+
+        if (usuarioRepository.existsByEmail(usuarioRequestDTO.email())) {
+            throw new EmailJaCadastradoException();
+        }
+
         var usuario = new Usuario();
         usuario.setNome(usuarioRequestDTO.nome());
         usuario.setApelido(usuarioRequestDTO.apelido());

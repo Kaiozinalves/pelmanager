@@ -4,6 +4,7 @@ import com.pelmanager.dto.request.RodadaRequestDTO;
 import com.pelmanager.entity.GrupoPelada;
 import com.pelmanager.entity.Rodada;
 import com.pelmanager.entity.enums.StatusRodada;
+import com.pelmanager.exception.RodadaAtivaExistenteException;
 import com.pelmanager.repository.EnderecoRepository;
 import com.pelmanager.repository.GrupoPeladaRepository;
 import com.pelmanager.repository.RodadaRepository;
@@ -26,6 +27,10 @@ public class RodadaService {
     public void agendarRodada(RodadaRequestDTO dto) {
         GrupoPelada grupo = grupoPeladaRepository.findById(dto.grupoId())
                 .orElseThrow(() -> new RuntimeException("Grupo não encontrado."));
+
+        if (rodadaRepository.existsByGrupoIdAndStatusRodada(grupo.getId(), StatusRodada.AGENDADA)) {
+            throw new RodadaAtivaExistenteException();
+        }
 
         Rodada novaRodada = new Rodada();
         novaRodada.setGrupo(grupo);

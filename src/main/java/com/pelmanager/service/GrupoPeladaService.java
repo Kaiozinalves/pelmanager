@@ -8,6 +8,8 @@ import com.pelmanager.entity.Participante;
 import com.pelmanager.entity.Usuario;
 // TODO: Lembre de importar o seu Enum aqui. Ex: import com.pelmanager.entity.enums.Papel;
 import com.pelmanager.entity.enums.Papel;
+import com.pelmanager.exception.CodigoConviteInvalidoException;
+import com.pelmanager.exception.UsuarioJaParticipaException;
 import com.pelmanager.repository.GrupoPeladaRepository;
 import com.pelmanager.repository.ParticipanteRepository;
 import com.pelmanager.repository.UsuarioRepository;
@@ -89,11 +91,11 @@ public class GrupoPeladaService {
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
 
         GrupoPelada grupo = grupoRepository.findByCodigoConvite(dto.codigoConvite())
-                .orElseThrow(() -> new RuntimeException("Código de convite inválido ou grupo não existe."));
+                .orElseThrow(CodigoConviteInvalidoException::new);
 
 
         if (participanteRepository.existsByUsuarioIdAndGrupoId(jogador.getId(), grupo.getId())) {
-            throw new RuntimeException("Você já participa deste grupo!");
+            throw new UsuarioJaParticipaException();
         }
 
         Participante novoParticipante = new Participante();
