@@ -4,6 +4,8 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Login } from "./pages/Login";
 import { Cadastro } from "./pages/Cadastro";
 import { Home } from "./pages/Home";
+import { Perfil } from "./pages/Perfil";
+import { GrupoDetalhes } from "./pages/GrupoDetalhes";
 
 function App() {
   return (
@@ -17,6 +19,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/perfil"
+            element={
+              <ProtectedRoute>
+                <Perfil />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/grupos/:id"
+            element={
+              <ProtectedRoute>
+                <GrupoDetalhes />
               </ProtectedRoute>
             }
           />

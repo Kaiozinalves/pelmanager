@@ -6,7 +6,7 @@ export function AuthLayout({ titulo, subtitulo, children }) {
       <aside className="auth-painel">
         <div className="auth-painel-conteudo">
           <span className="marca">Pelada</span>
-          <h1 className="auth-frase">Bola rolando<br />todo sábado.</h1>
+          <h1 className="auth-frase">Bola rolando<br />toda hora.</h1>
           <p className="auth-descricao">
             Organize sua pelada, chame o pessoal e nunca mais fique
             devendo o mensalista.

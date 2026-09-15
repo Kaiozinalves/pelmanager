@@ -4,20 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { AuthLayout } from "../components/AuthLayout";
 import { Input, Select } from "../components/Input";
 import { Button } from "../components/Button";
-
-const POSICOES = [
-  { valor: "GOLEIRO", rotulo: "Goleiro" },
-  { valor: "ZAGUEIRO", rotulo: "Zagueiro" },
-  { valor: "LATERAL", rotulo: "Lateral" },
-  { valor: "MEIO_CAMPO", rotulo: "Meio-campo" },
-  { valor: "ATACANTE", rotulo: "Atacante" },
-];
-
-const PERNAS = [
-  { valor: "DESTRO", rotulo: "Destro" },
-  { valor: "CANHOTO", rotulo: "Canhoto" },
-  { valor: "AMBIDESTRO", rotulo: "Ambidestro" },
-];
+import { POSICOES, PERNAS } from "../constants/enums";
 
 const FORM_INICIAL = {
   nome: "",
@@ -51,7 +38,6 @@ export function Cadastro() {
     }
 
     const { confirmarSenha, ...dadosParaEnviar } = form;
-    // posicaoSecundaria é opcional: manda null em vez de string vazia
     dadosParaEnviar.posicaoSecundaria = dadosParaEnviar.posicaoSecundaria || null;
 
     const sucesso = await cadastrar(dadosParaEnviar);

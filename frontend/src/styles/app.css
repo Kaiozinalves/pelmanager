@@ -135,6 +135,12 @@
   border-color: var(--cor-grama);
 }
 
+.campo-input:disabled {
+  background: var(--cor-giz-forte);
+  color: var(--cor-tinta-suave);
+  cursor: not-allowed;
+}
+
 .campo-erro {
   font-size: 13px;
   color: var(--cor-erro);
@@ -292,6 +298,14 @@
   padding: var(--espaco-3);
   border: 1px solid var(--cor-linha);
   border-radius: var(--raio-pequeno);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.item-grupo:hover {
+  border-color: var(--cor-grama);
+  background: var(--cor-giz-forte);
 }
 
 .item-grupo-nome {
@@ -301,6 +315,54 @@
 .item-grupo-local {
   color: var(--cor-tinta-suave);
   font-size: 14px;
+}
+
+/* ---------- Página central (Perfil / Detalhes do grupo) ---------- */
+.pagina-central {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--espaco-6) var(--espaco-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-5);
+}
+
+.subtitulo-secao {
+  font-size: 18px;
+  color: var(--cor-tinta);
+  margin: var(--espaco-5) 0 var(--espaco-3);
+}
+
+.lista-participantes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.item-participante {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--espaco-3);
+  border: 1px solid var(--cor-linha);
+  border-radius: var(--raio-pequeno);
+}
+
+.badge-papel {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--cor-giz-forte);
+  color: var(--cor-tinta-suave);
+}
+
+.badge-papel--admin {
+  background: var(--cor-ouro);
+  color: var(--cor-tinta);
 }
 
 /* ---------- Responsivo ---------- */

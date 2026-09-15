@@ -1,8 +1,8 @@
 # Pelada — Frontend (Sprint 1)
 
 Frontend em React (Vite) cobrindo a primeira sprint do gerenciador de
-peladas: cadastro de usuário, criar pelada e entrar numa pelada com código
-de convite. Construído a partir do projeto `pelmanager` (Spring Boot) real.
+peladas: login, cadastro, perfil, criar/entrar em pelada, ver detalhes +
+participantes de uma pelada, e agendar rodada.
 
 ## Como rodar
 
@@ -21,63 +21,49 @@ VITE_API_URL=http://localhost:8080/api
 
 ```
 src/
-├── api/            # chamadas HTTP (axios)
-├── context/        # AuthContext: guarda o usuário "logado"
-├── pages/          # Login, Cadastro, Home
+├── api/            # chamadas HTTP (axios): usuario, grupo, rodada
+├── constants/       # enums.js — opções de posição/perna + helper de erro
+├── context/        # AuthContext: guarda o usuário logado
+├── pages/          # Login, Cadastro, Home, Perfil, GrupoDetalhes
 ├── components/     # Input, Button, AuthLayout, ProtectedRoute, GraficoCampo
 └── styles/         # tokens.css (design system) + app.css
 ```
 
-## Como cada tela bate com o backend `com.pelmanager`
+## Mapa de telas ↔ endpoints
 
-| Tela / ação                  | Endpoint                | Status no backend |
-|-------------------------------|--------------------------|--------------------|
-| Cadastro                      | `POST /api/usuarios`     | ✅ existe          |
-| Criar pelada                  | `POST /api/grupos`       | ✅ existe          |
-| Entrar com código de convite  | `POST /api/grupos/entrar`| ✅ existe          |
-| Login                         | `POST /api/usuarios/login` | ✅ existe        |
-| Listar minhas peladas         | `GET /api/grupos/meus`   | ❌ não existe      |
+| Tela | Endpoint | Status |
+|---|---|---|
+| Cadastro | `POST /api/usuarios` | ✅ |
+| Login | `POST /api/usuarios/login` | ✅ |
+| Perfil (ver) | `GET /api/usuarios/{id}` | ✅ |
+| Perfil (editar) | `PUT /api/usuarios/{id}` | ✅ |
+| Criar pelada | `POST /api/grupos` | ✅ |
+| Entrar com código | `POST /api/grupos/entrar` | ✅ |
+| Lista "Suas peladas" | `GET /api/grupos/meus?usuarioId=` | ✅ |
+| Detalhes + participantes | `GET /api/grupos/{id}` | ✅ |
+| Agendar rodada | `POST /api/rodadas` | ✅ (só criar — ainda não existe GET pra listar rodadas) |
 
-## Sobre o login
+Todos os endpoints que o frontend usa já existem no backend atual. O que
+ficou de fora da sprint (por decisão de vocês, não é bug):
+check-in de presença na rodada (`CheckIn` nunca chegou a virar entidade).
 
-O backend já tem o endpoint de autenticação implementado em
-`POST /api/usuarios/login`.
+## Detalhes que valem atenção
 
-O frontend usa esse fluxo assim:
-
-- faz a requisição com `email` e `senha`;
-- salva o `UsuarioResponseDTO` em `localStorage`;
-- redireciona para a Home;
-- envia o `pelada_token` em todas as chamadas, quando existir.
-
-Ainda vale lembrar que a autenticação atual é uma implementação de sprint,
-sem hash de senha e sem JWT real. Isso é suficiente para rodar a demo, mas
-precisa ser substituído por uma estratégia segura em produção.
-
-## Criar pelada
-
-`GrupoPeladaRequestDTO` não tem endereço (diferente do que a gente tinha
-desenhado antes) — só `nome` e `fundadorId`. O `fundadorId` é preenchido
-automaticamente com o `id` do usuário logado, o campo não aparece no
-formulário.
-
-O `codigoConvite` é gerado pelo backend na criação — a tela mostra ele
-destacado assim que a pelada é criada, pra você copiar e mandar pro grupo.
-
-## Entrar numa pelada
-
-Novo formulário na Home. Chama `POST /api/grupos/entrar` com
-`{ IdUsuario, codigoConvite }` (repara que o DTO usa `IdUsuario` com "I"
-maiúsculo — reflete exatamente o nome do campo no
-`EntrarGrupoPeladaRequestDTO`).
-
-## Lista "Suas peladas"
-
-Como `GET /api/grupos/meus` ainda não existe, a lista mostra só o que foi
-criado ou entrado durante a sessão atual do navegador (fica vazia de novo
-se você recarregar a página). Assim que você implementar esse endpoint no
-backend, a tela detecta a resposta e passa a confiar nela — não precisa
-mexer no código do frontend, só implementar o endpoint.
+- **Mensagens de erro do backend** vêm no campo `mensagem` (em português),
+  não `message`. O helper `extrairMensagemErro()` em `constants/enums.js`
+  já trata isso, tentando `mensagem` e depois `message` como fallback.
+- **`GrupoPeladaDetalhesResponseDTO` não inclui endereço** — só o retorno
+  de `/grupos/meus` inclui. A tela de detalhes do grupo, por isso, não
+  mostra endereço, só nome/código/participantes.
+- **Editar perfil não inclui e-mail nem senha** — de propósito. Trocar
+  e-mail ou senha geralmente pede um fluxo de confirmação à parte, que
+  ainda não existe.
+- **Agendar rodada não permite escolher endereço alternativo** no
+  formulário — o backend aceita um `enderecoAlternativoId`, mas não existe
+  nenhum endpoint pra criar/listar endereços avulsos escolhíveis, então o
+  frontend sempre manda `null` (a rodada usa o endereço do próprio grupo).
+- **Sem GET de rodadas** — dá pra agendar, mas a tela não lista as rodadas
+  já agendadas de um grupo, porque esse endpoint ainda não existe.
 
 ## Enums
 
