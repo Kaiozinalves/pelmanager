@@ -1,0 +1,1024 @@
+package com.pelmanager.dto;
+
+import java.time.LocalDateTime;
+
+public record ErroResponseDTO(
+        LocalDateTime timestamp,
+        Integer status,
+        String mensagem
+) {
+}package com.pelmanager.dto;
+
+import com.pelmanager.entity.enums.Papel;
+
+import java.time.LocalDateTime;
+
+public record ParticipanteResponseDTO(
+        Long id,
+        Long usuarioId,
+        String nome,
+        String apelido,
+        Papel papel,
+        LocalDateTime dataEntrada
+) {}
+package com.pelmanager.dto;
+
+import java.time.LocalDateTime;
+
+
+public record GrupoPeladaResponseDTO(Long id,
+                                     String nome,
+                                     String codigoConvite,
+                                     LocalDateTime dataCriacao,
+                                     EnderecoResponseDTO endereco
+                                        ) {
+}
+package com.pelmanager.dto;
+
+public record EntrarGrupoPeladaRequestDTO(Long IdUsuario,
+                                          String codigoConvite) {
+}
+package com.pelmanager.dto;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+public record GrupoPeladaDetalhesResponseDTO(
+        Long id,
+        String nome,
+        String codigoConvite,
+        LocalDateTime dataCriacao,
+        List<ParticipanteResponseDTO> participantes
+) {}package com.pelmanager.dto.request;
+
+public record EnderecoRequestDTO(
+        String logradouro,
+        String numero,
+        String bairro,
+        String cidade,
+        String estado,
+        String cep
+) {}package com.pelmanager.dto.request;
+
+
+public record GrupoPeladaRequestDTO(String nome,
+                                    Long fundadorId,
+                                    EnderecoRequestDTO endereco) {
+}
+package com.pelmanager.dto.request;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+public record RodadaRequestDTO(Long grupoId,
+                               @JsonFormat(pattern = "HH:mm")
+                               LocalTime horario,
+                               @JsonFormat(pattern = "yyyy-MM-dd")
+                               LocalDate data,
+                               Long enderecoAlternativoId) {
+}
+package com.pelmanager.dto.request;
+
+public record LoginRequestDTO(String email, String senha) {
+}
+package com.pelmanager.dto.request;
+
+import com.pelmanager.entity.enums.PernaDominante;
+import com.pelmanager.entity.enums.Posicao;
+
+public record UsuarioUpdateRequestDTO(
+        String nome,
+        String apelido,
+        PernaDominante peDominante,
+        Posicao posicaoPrimaria,
+        Posicao posicaoSecundaria
+) {}
+package com.pelmanager.dto.request;
+
+import com.pelmanager.entity.enums.PernaDominante;
+import com.pelmanager.entity.enums.Posicao;
+
+
+public record UsuarioRequestDTO(
+        String nome,
+        String apelido,
+        String email,
+        String senha,
+        PernaDominante peDominante,
+        Posicao posicaoPrimaria,
+        Posicao posicaoSecundaria
+) {}
+package com.pelmanager.dto;
+
+public record EnderecoResponseDTO(
+        Long id,
+        String logradouro,
+        String numero,
+        String bairro,
+        String cidade,
+        String estado,
+        String cep
+) {}
+package com.pelmanager.dto;
+
+import com.pelmanager.entity.enums.PernaDominante;
+import com.pelmanager.entity.enums.Posicao;
+import lombok.Data;
+
+
+public record UsuarioResponseDTO(
+        Long id,
+        String nome,
+        String apelido,
+        String email,
+        PernaDominante peDominante,
+        Posicao posicaoPrimaria,
+        Posicao posicaoSecundaria
+) {}
+package com.pelmanager.repository;
+
+import com.pelmanager.entity.Endereco;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface EnderecoRepository extends JpaRepository<Endereco, Long> {
+}
+package com.pelmanager.repository;
+
+import com.pelmanager.entity.Participante;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ParticipanteRepository extends JpaRepository<Participante, Long> {
+
+    Boolean existsByUsuarioIdAndGrupoId(Long usuarioId, Long grupoId);
+}
+package com.pelmanager.repository;
+
+
+import com.pelmanager.entity.GrupoPelada;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface GrupoPeladaRepository extends JpaRepository<GrupoPelada, Long> {
+
+    Optional<GrupoPelada> findByCodigoConvite(String codigoConvite);
+
+    @Query("SELECT g FROM GrupoPelada g JOIN g.participantes p WHERE p.usuario.id = :usuarioId")
+    List<GrupoPelada> findByUsuarioId(@Param("usuarioId") Long usuarioId);
+
+}
+package com.pelmanager.repository;
+
+import com.pelmanager.entity.Usuario;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+    Optional<Usuario> findByEmail(String email);
+
+    Boolean existsByEmail(String email);
+}
+package com.pelmanager.repository;
+
+import com.pelmanager.entity.Rodada;
+import com.pelmanager.entity.enums.StatusRodada;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface RodadaRepository extends JpaRepository<Rodada, Long> {
+
+    // Busca se existe alguma rodada para este grupo com um status específico
+    boolean existsByGrupoIdAndStatusRodada(Long grupoId, StatusRodada status);
+
+}
+package com.pelmanager.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class CorsConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**")
+                .allowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true);
+    }
+}
+package com.pelmanager.entity.enums;
+
+public enum PernaDominante {
+    DESTRO,
+    CANHOTO,
+    AMBIDESTRO
+}
+package com.pelmanager.entity.enums;
+
+public enum StatusCheckIn {
+    CONFIRMADO,
+    CANCELADO
+}
+package com.pelmanager.entity.enums;
+
+public enum StatusRodada {
+    AGENDADA,
+    EM_ANDAMENTO,
+    FINALIZADA,
+    CANCELADA;
+
+    public boolean permiteCheckin() {
+        return this == AGENDADA;
+    }
+}package com.pelmanager.entity.enums;
+
+public enum Posicao {
+    GOLEIRO,
+    ZAGUEIRO,
+    LATERAL,
+    MEIO_CAMPO,
+    ATACANTE
+}
+package com.pelmanager.entity.enums;
+
+public enum StatusMembro {
+}
+package com.pelmanager.entity.enums;
+
+public enum Papel {
+    ADMIN,
+    MEMBRO
+}
+package com.pelmanager.entity;
+
+import com.pelmanager.entity.enums.StatusRodada;
+import jakarta.persistence.*;
+import lombok.Data;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+@Entity
+@Table(name = "rodadas")
+@Data
+public class Rodada {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    //Um grupo possui várias rodadas, mas uma rodada pertence a apenas um grupo
+    @ManyToOne
+    @JoinColumn(name = "grupo_id", nullable = false)
+    private GrupoPelada grupo;
+
+    LocalDate dataRodada;
+    LocalTime horaRodada;
+    @Enumerated(EnumType.STRING)
+    StatusRodada statusRodada;
+
+    @ManyToOne
+    @JoinColumn(name = "enderecoAlternativo_id")
+    private Endereco enderecoAlternativo;
+    //Se o endereçoAlternativo for nulo, a rodada será realizada no endereço do grupo
+    public Endereco getEnderecoResolvido() {
+        if (this.enderecoAlternativo != null) {
+            return this.enderecoAlternativo;
+        }
+        return this.grupo.getEndereco();
+    }
+
+    //A rodada inicia quando o checkin é encerrado
+    public boolean estaAberta() {
+        return this.statusRodada != null && this.statusRodada.permiteCheckin();
+    }
+
+
+
+}
+package com.pelmanager.entity;
+
+import com.pelmanager.entity.enums.PernaDominante;
+import com.pelmanager.entity.enums.Posicao;
+import jakarta.persistence.*;
+import lombok.Data;
+
+import java.util.List;
+
+@Entity
+@Table(name = "usuarios")
+@Data
+public class Usuario {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String nome;
+
+    private String apelido;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false)
+    private String senha;
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
+    private List<Participante> gruposQueParticipa;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "perna_dominante", length = 10)
+    private PernaDominante pernaDominante;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "posicao_primaria", length = 20)
+    private Posicao posicaoPrimaria; // ZAG, MEI, ATA ou GOL
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "posicao_secundaria", length = 20)
+    private Posicao posicaoSecundaria;
+}
+package com.pelmanager.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Entity
+@Table(name = "grupo_peladas")
+@Data
+public class GrupoPelada {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String nome;
+
+    @OneToMany(mappedBy = "grupo", cascade = CascadeType.ALL)
+    private List<Participante> participantes;
+
+    private String codigoConvite;
+
+    private LocalDateTime dataCriacao;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "endereco_id")
+    private Endereco endereco;
+}package com.pelmanager.entity;
+
+import com.pelmanager.entity.enums.Papel;
+import jakarta.persistence.*;
+import lombok.Data;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "participantes")
+@Data
+public class Participante {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+
+    @ManyToOne
+    @JoinColumn(name = "grupo_id", nullable = false)
+    private GrupoPelada grupo;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "papel", nullable = false)
+    private Papel papel;
+
+    LocalDateTime dataEntrada;
+
+    public boolean isAdmin() {
+        return this.papel == Papel.ADMIN;
+    }
+
+}
+package com.pelmanager.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+@Entity
+@Table(name = "enderecos")
+@Data
+public class Endereco {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String logradouro;
+
+    private String numero;
+
+    private String bairro;
+
+    @Column(nullable = false)
+    private String cidade;
+
+    @Column(length = 2)
+    private String estado;
+
+    @Column(length = 9)
+    private String cep;
+
+    public String enderecoCompleto() {
+        return String.format("%s, %s - %s, %s - %s, CEP: %s",
+                this.logradouro, this.numero, this.bairro, this.cidade, this.estado, this.cep);
+    }
+}package com.pelmanager;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class PelmanagerApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(PelmanagerApplication.class, args);
+	}
+
+}
+package com.pelmanager.controller;
+
+import com.pelmanager.dto.request.EntrarGrupoPeladaRequestDTO;
+import com.pelmanager.dto.GrupoPeladaDetalhesResponseDTO;
+import com.pelmanager.dto.request.GrupoPeladaRequestDTO;
+import com.pelmanager.dto.GrupoPeladaResponseDTO;
+import com.pelmanager.service.GrupoPeladaService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/grupos")
+public class GrupoPeladaController {
+    private final GrupoPeladaService service;
+
+    public GrupoPeladaController(GrupoPeladaService service) {
+        this.service = service;
+    }
+
+    @PostMapping
+    public ResponseEntity<GrupoPeladaResponseDTO> criar(@RequestBody GrupoPeladaRequestDTO dto) {
+        GrupoPeladaResponseDTO response = service.criar(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/entrar")
+    public ResponseEntity<Void> entrarNoGrupo(@RequestBody EntrarGrupoPeladaRequestDTO dto) {
+        service.entrarNoGrupo(dto);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/meus")
+    public ResponseEntity<List<GrupoPeladaResponseDTO>> listarMeusGrupos(@RequestParam Long usuarioId) {
+        var grupos = service.listarPeladasDoUsuario(usuarioId);
+
+        return ResponseEntity.ok(grupos);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<GrupoPeladaDetalhesResponseDTO> buscarDetalhes(@PathVariable Long id) {
+        return ResponseEntity.ok(service.buscarDetalhes(id));
+    }
+}
+
+
+package com.pelmanager.controller;
+
+import com.pelmanager.dto.request.RodadaRequestDTO;
+import com.pelmanager.service.RodadaService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+
+@RestController
+@RequestMapping("/api/rodadas")
+public class RodadaController {
+    private final RodadaService service;
+
+    public RodadaController(RodadaService service) {
+        this.service = service;
+    }
+
+    @PostMapping
+    public ResponseEntity<Void> agendarRodada(@RequestBody RodadaRequestDTO dto) {
+        service.agendarRodada(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+}
+package com.pelmanager.controller;
+
+import com.pelmanager.dto.request.LoginRequestDTO;
+import com.pelmanager.dto.request.UsuarioRequestDTO;
+import com.pelmanager.dto.UsuarioResponseDTO;
+import com.pelmanager.dto.request.UsuarioUpdateRequestDTO;
+import com.pelmanager.service.UsuarioService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/usuarios")
+public class UsuarioController {
+
+    private final UsuarioService usuarioService;
+
+    public UsuarioController(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
+    }
+
+    @PostMapping
+    public ResponseEntity<UsuarioResponseDTO> cadastrar(@RequestBody UsuarioRequestDTO dto) {
+        var response = usuarioService.cadastrarUsuario(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<UsuarioResponseDTO> autenticar(@RequestBody LoginRequestDTO dto) {
+        var usuario = usuarioService.autenticar(dto);
+        return ResponseEntity.ok(usuario);
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<UsuarioResponseDTO> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(usuarioService.buscarPorId(id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UsuarioResponseDTO> atualizar(@PathVariable Long id,
+                                                        @RequestBody UsuarioUpdateRequestDTO dto) {
+        return ResponseEntity.ok(usuarioService.atualizarUsuario(id, dto));
+    }
+}package com.pelmanager.service;
+
+import com.pelmanager.dto.request.EnderecoRequestDTO;
+import com.pelmanager.entity.Endereco;
+import com.pelmanager.repository.EnderecoRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+
+@Service
+public class EnderecoService {
+    private final EnderecoRepository repository;
+
+    public EnderecoService(EnderecoRepository repository) {
+        this.repository = repository;
+    }
+
+    @Transactional
+    public Endereco cadastrarEndereco(EnderecoRequestDTO dto) {
+        Endereco endereco = new Endereco();
+        endereco.setLogradouro(dto.logradouro());
+        endereco.setNumero(dto.numero());
+        endereco.setBairro(dto.bairro());
+        endereco.setCidade(dto.cidade());
+        endereco.setEstado(dto.estado());
+        endereco.setCep(dto.cep());
+
+        return repository.save(endereco);
+    }
+}
+package com.pelmanager.service;
+
+import com.pelmanager.dto.*;
+import com.pelmanager.dto.request.GrupoPeladaRequestDTO;
+import com.pelmanager.entity.Endereco;
+import com.pelmanager.entity.GrupoPelada;
+import com.pelmanager.entity.Participante;
+import com.pelmanager.entity.Usuario;
+// TODO: Lembre de importar o seu Enum aqui. Ex: import com.pelmanager.entity.enums.Papel;
+import com.pelmanager.entity.enums.Papel;
+import com.pelmanager.exception.CodigoConviteInvalidoException;
+import com.pelmanager.exception.UsuarioJaParticipaException;
+import com.pelmanager.repository.GrupoPeladaRepository;
+import com.pelmanager.repository.ParticipanteRepository;
+import com.pelmanager.repository.UsuarioRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+public class GrupoPeladaService {
+
+    private final GrupoPeladaRepository grupoRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final ParticipanteRepository participanteRepository;
+
+    public GrupoPeladaService(GrupoPeladaRepository grupoRepository,
+                              UsuarioRepository usuarioRepository,
+                              ParticipanteRepository participanteRepository) {
+        this.grupoRepository = grupoRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.participanteRepository = participanteRepository;
+    }
+
+    @Transactional
+    public GrupoPeladaResponseDTO criar(GrupoPeladaRequestDTO dto) {
+
+        // Impede que a pelada seja criada sem um dono válido
+        Usuario dono = usuarioRepository.findById(dto.fundadorId())
+                .orElseThrow(() -> new RuntimeException("Usuário criador não encontrado."));
+
+        Endereco endereco = new Endereco();
+        endereco.setLogradouro(dto.endereco().logradouro());
+        endereco.setNumero(dto.endereco().numero());
+        endereco.setBairro(dto.endereco().bairro());
+        endereco.setCidade(dto.endereco().cidade());
+        endereco.setEstado(dto.endereco().estado());
+        endereco.setCep(dto.endereco().cep());
+
+        GrupoPelada grupo = new GrupoPelada();
+        grupo.setNome(dto.nome());
+        grupo.setCodigoConvite(UUID.randomUUID().toString().substring(0, 6).toUpperCase());
+        grupo.setDataCriacao(LocalDateTime.now());
+        grupo.setEndereco(endereco);
+
+        GrupoPelada grupoSalvo = grupoRepository.save(grupo);
+
+        // Gera o vinculo automaticamente
+        Participante admin = new Participante();
+        admin.setUsuario(dono);
+        admin.setGrupo(grupoSalvo);
+        admin.setPapel(Papel.ADMIN);
+        admin.setDataEntrada(LocalDateTime.now());
+
+        participanteRepository.save(admin);
+
+        return new GrupoPeladaResponseDTO(
+                grupoSalvo.getId(),
+                grupoSalvo.getNome(),
+                grupoSalvo.getCodigoConvite(),
+                grupoSalvo.getDataCriacao(),
+                new EnderecoResponseDTO(
+                        grupoSalvo.getEndereco().getId(),
+                        grupoSalvo.getEndereco().getLogradouro(),
+                        grupoSalvo.getEndereco().getNumero(),
+                        grupoSalvo.getEndereco().getBairro(),
+                        grupoSalvo.getEndereco().getCidade(),
+                        grupoSalvo.getEndereco().getEstado(),
+                        grupoSalvo.getEndereco().getCep()
+                )
+        );
+    }
+
+    @Transactional
+    public void entrarNoGrupo(EntrarGrupoPeladaRequestDTO dto) {
+
+        Usuario jogador = usuarioRepository.findById(dto.IdUsuario())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+
+        GrupoPelada grupo = grupoRepository.findByCodigoConvite(dto.codigoConvite())
+                .orElseThrow(CodigoConviteInvalidoException::new);
+
+
+        if (participanteRepository.existsByUsuarioIdAndGrupoId(jogador.getId(), grupo.getId())) {
+            throw new UsuarioJaParticipaException();
+        }
+
+        Participante novoParticipante = new Participante();
+        novoParticipante.setUsuario(jogador);
+        novoParticipante.setGrupo(grupo);
+        novoParticipante.setPapel(Papel.MEMBRO);
+        novoParticipante.setDataEntrada(LocalDateTime.now());
+
+        participanteRepository.save(novoParticipante);
+    }
+
+    public List<GrupoPeladaResponseDTO> listarPeladasDoUsuario(Long usuarioId) {
+        List<GrupoPelada> grupos = grupoRepository.findByUsuarioId(usuarioId);
+
+        return grupos.stream()
+                .map(grupo -> {
+                    // 1. Prepara o DTO de endereço (com verificação para evitar erro se o grupo não tiver quadra)
+                    EnderecoResponseDTO enderecoDTO = null;
+                    if (grupo.getEndereco() != null) {
+                        enderecoDTO = new EnderecoResponseDTO(
+                                grupo.getEndereco().getId(),
+                                grupo.getEndereco().getLogradouro(),
+                                grupo.getEndereco().getNumero(),
+                                grupo.getEndereco().getBairro(),
+                                grupo.getEndereco().getCidade(),
+                                grupo.getEndereco().getEstado(),
+                                grupo.getEndereco().getCep()
+                        );
+                    }
+
+                    // 2. Retorna o DTO do Grupo
+                    return new GrupoPeladaResponseDTO(
+                            grupo.getId(),
+                            grupo.getNome(),
+                            grupo.getCodigoConvite(),
+                            grupo.getDataCriacao(),
+                            enderecoDTO
+                    );
+                })
+                .toList();
+    }
+    public GrupoPeladaDetalhesResponseDTO buscarDetalhes(Long id) {
+        GrupoPelada grupo = grupoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pelada não encontrada."));
+
+        List<ParticipanteResponseDTO> participantes = grupo.getParticipantes().stream()
+                .map(participante -> new ParticipanteResponseDTO(
+                        participante.getId(),
+                        participante.getUsuario().getId(),
+                        participante.getUsuario().getNome(),
+                        participante.getUsuario().getApelido(),
+                        participante.getPapel(),
+                        participante.getDataEntrada()
+                ))
+                .toList();
+
+        return new GrupoPeladaDetalhesResponseDTO(
+                grupo.getId(),
+                grupo.getNome(),
+                grupo.getCodigoConvite(),
+                grupo.getDataCriacao(),
+                participantes
+        );
+    }
+
+}package com.pelmanager.service;
+
+import com.pelmanager.dto.request.RodadaRequestDTO;
+import com.pelmanager.entity.GrupoPelada;
+import com.pelmanager.entity.Rodada;
+import com.pelmanager.entity.enums.StatusRodada;
+import com.pelmanager.exception.RodadaAtivaExistenteException;
+import com.pelmanager.repository.EnderecoRepository;
+import com.pelmanager.repository.GrupoPeladaRepository;
+import com.pelmanager.repository.RodadaRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+
+@Service
+public class RodadaService {
+    private final RodadaRepository rodadaRepository;
+    private final GrupoPeladaRepository grupoPeladaRepository;
+    private final EnderecoRepository enderecoRepository;
+
+    public RodadaService(RodadaRepository rodadaRepository, GrupoPeladaRepository grupoPeladaRepository, EnderecoRepository enderecoRepository) {
+        this.rodadaRepository = rodadaRepository;
+        this.grupoPeladaRepository = grupoPeladaRepository;
+        this.enderecoRepository = enderecoRepository;
+    }
+
+    @Transactional
+    public void agendarRodada(RodadaRequestDTO dto) {
+        GrupoPelada grupo = grupoPeladaRepository.findById(dto.grupoId())
+                .orElseThrow(() -> new RuntimeException("Grupo não encontrado."));
+
+        if (rodadaRepository.existsByGrupoIdAndStatusRodada(grupo.getId(), StatusRodada.AGENDADA)) {
+            throw new RodadaAtivaExistenteException();
+        }
+
+        Rodada novaRodada = new Rodada();
+        novaRodada.setGrupo(grupo);
+        novaRodada.setDataRodada(dto.data());
+        novaRodada.setHoraRodada(dto.horario());
+        novaRodada.setStatusRodada(StatusRodada.AGENDADA);
+
+        // Verifica se foi passado um endereço diferente
+        if (dto.enderecoAlternativoId() != null) {
+            novaRodada.setEnderecoAlternativo(enderecoRepository.findById(dto.enderecoAlternativoId())
+                    .orElseThrow(() -> new RuntimeException("Endereço alternativo não encontrado.")));
+        } else {
+            // Se não foi passado, grava fisicamente o endereço oficial do grupo na rodada
+            novaRodada.setEnderecoAlternativo(grupo.getEndereco());
+        }
+
+        rodadaRepository.save(novaRodada);
+    }
+}
+package com.pelmanager.service;
+
+import com.pelmanager.dto.request.LoginRequestDTO;
+import com.pelmanager.dto.request.UsuarioRequestDTO;
+import com.pelmanager.dto.UsuarioResponseDTO;
+import com.pelmanager.dto.request.UsuarioUpdateRequestDTO;
+import com.pelmanager.entity.Usuario;
+import com.pelmanager.exception.EmailJaCadastradoException;
+import com.pelmanager.repository.UsuarioRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+
+@Service
+public class UsuarioService {
+
+    //injecao de dependencia
+    private final UsuarioRepository usuarioRepository;
+    public UsuarioService(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
+    }
+
+    @Transactional
+    public UsuarioResponseDTO cadastrarUsuario(UsuarioRequestDTO usuarioRequestDTO){
+
+        if (usuarioRepository.existsByEmail(usuarioRequestDTO.email())) {
+            throw new EmailJaCadastradoException();
+        }
+
+        var usuario = new Usuario();
+        usuario.setNome(usuarioRequestDTO.nome());
+        usuario.setApelido(usuarioRequestDTO.apelido());
+        usuario.setEmail(usuarioRequestDTO.email());
+        usuario.setSenha(usuarioRequestDTO.senha());
+        usuario.setPernaDominante(usuarioRequestDTO.peDominante());
+        usuario.setPosicaoPrimaria(usuarioRequestDTO.posicaoPrimaria());
+        usuario.setPosicaoSecundaria(usuarioRequestDTO.posicaoSecundaria());
+
+        var usuarioSalvo = usuarioRepository.save(usuario);
+        return new UsuarioResponseDTO(
+                usuarioSalvo.getId(),
+                usuarioSalvo.getNome(),
+                usuarioSalvo.getApelido(),
+                usuarioSalvo.getEmail(),
+                usuarioSalvo.getPernaDominante(),
+                usuarioSalvo.getPosicaoPrimaria(),
+                usuarioSalvo.getPosicaoSecundaria()
+        );
+    }
+
+    public UsuarioResponseDTO autenticar(LoginRequestDTO dto) {
+        Usuario usuario = usuarioRepository.findByEmail(dto.email())
+                .orElseThrow(() -> new RuntimeException("E-mail não cadastrado."));
+
+        if (!usuario.getSenha().equals(dto.senha())) {
+            throw new RuntimeException("Senha incorreta.");
+        }
+
+        return new UsuarioResponseDTO(
+                usuario.getId(),
+                usuario.getNome(),
+                usuario.getApelido(),
+                usuario.getEmail(),
+                usuario.getPernaDominante(),
+                usuario.getPosicaoPrimaria(),
+                usuario.getPosicaoSecundaria()
+        );
+    }
+    public UsuarioResponseDTO buscarPorId(Long id) {
+        var usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+
+        return new UsuarioResponseDTO(
+                usuario.getId(),
+                usuario.getNome(),
+                usuario.getApelido(),
+                usuario.getEmail(),
+                usuario.getPernaDominante(),
+                usuario.getPosicaoPrimaria(),
+                usuario.getPosicaoSecundaria()
+        );
+    }
+
+    @Transactional
+    public UsuarioResponseDTO atualizarUsuario(Long id, UsuarioUpdateRequestDTO dto) {
+        var usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+
+        usuario.setNome(dto.nome());
+        usuario.setApelido(dto.apelido());
+        usuario.setPernaDominante(dto.peDominante());
+        usuario.setPosicaoPrimaria(dto.posicaoPrimaria());
+        usuario.setPosicaoSecundaria(dto.posicaoSecundaria());
+
+        var usuarioAtualizado = usuarioRepository.save(usuario);
+
+        return new UsuarioResponseDTO(
+                usuarioAtualizado.getId(),
+                usuarioAtualizado.getNome(),
+                usuarioAtualizado.getApelido(),
+                usuarioAtualizado.getEmail(),
+                usuarioAtualizado.getPernaDominante(),
+                usuarioAtualizado.getPosicaoPrimaria(),
+                usuarioAtualizado.getPosicaoSecundaria()
+        );
+    }
+}
+package com.pelmanager.exception;
+
+public class EmailJaCadastradoException extends RuntimeException {
+    public EmailJaCadastradoException(String message) {
+        super(message);
+    }
+
+    public EmailJaCadastradoException() {
+        super("Este e-mail já está cadastrado.");
+    }
+}
+package com.pelmanager.exception;
+
+import com.pelmanager.dto.ErroResponseDTO;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.LocalDateTime;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler extends RuntimeException {
+
+  @ExceptionHandler(CodigoConviteInvalidoException.class)
+  public ResponseEntity<ErroResponseDTO> tratarCodigoConviteInvalido(CodigoConviteInvalidoException e) {
+    ErroResponseDTO erroResponseDTO = new ErroResponseDTO(
+            LocalDateTime.now(),
+            HttpStatus.BAD_REQUEST.value(),
+            e.getMessage()
+    );
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(erroResponseDTO);
+  }
+
+  @ExceptionHandler(UsuarioJaParticipaException.class)
+  public ResponseEntity<ErroResponseDTO> tratarUsuarioJaParticipa(UsuarioJaParticipaException ex) {
+    ErroResponseDTO erro = new ErroResponseDTO(
+            LocalDateTime.now(),
+            HttpStatus.CONFLICT.value(),
+            ex.getMessage()
+    );
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
+  }
+
+  @ExceptionHandler(RodadaAtivaExistenteException.class)
+  public ResponseEntity<ErroResponseDTO> tratarRodadaAtivaExistente(RodadaAtivaExistenteException ex) {
+    ErroResponseDTO erro = new ErroResponseDTO(
+            LocalDateTime.now(),
+            HttpStatus.CONFLICT.value(),
+            ex.getMessage()
+    );
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
+  }
+
+  @ExceptionHandler(EmailJaCadastradoException.class)
+  public ResponseEntity<ErroResponseDTO> tratarEmailJaCadastrado(EmailJaCadastradoException ex) {
+
+    ErroResponseDTO erro = new ErroResponseDTO(
+            LocalDateTime.now(),
+            HttpStatus.CONFLICT.value(),
+            ex.getMessage()
+    );
+
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
+  }
+
+}
+package com.pelmanager.exception;
+
+public class UsuarioJaParticipaException extends RuntimeException {
+    public UsuarioJaParticipaException(String message) {
+        super(message)
+        ;
+    }
+
+    public UsuarioJaParticipaException() {
+        super("Você já participa dessa pelada.");
+    }
+}
+package com.pelmanager.exception;
+
+public class RodadaAtivaExistenteException extends RuntimeException {
+    public RodadaAtivaExistenteException(String message) {
+        super(message);
+    }
+
+    public RodadaAtivaExistenteException() {
+        super("Não é possível agendar. Já existe uma rodada em andamento ou agendada para este grupo.");
+    }
+}
+package com.pelmanager.exception;
+
+public class CodigoConviteInvalidoException extends RuntimeException {
+
+    public CodigoConviteInvalidoException() {
+        super("O código de convite informado é inválido, não existe ou já expirou.");
+    }
+}

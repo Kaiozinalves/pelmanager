@@ -1,6 +1,7 @@
 package com.pelmanager.service;
 
 import com.pelmanager.dto.*;
+import com.pelmanager.dto.request.EntrarGrupoPeladaRequestDTO;
 import com.pelmanager.dto.request.GrupoPeladaRequestDTO;
 import com.pelmanager.entity.Endereco;
 import com.pelmanager.entity.GrupoPelada;
@@ -112,7 +113,7 @@ public class GrupoPeladaService {
 
         return grupos.stream()
                 .map(grupo -> {
-                    // 1. Prepara o DTO de endereço (com verificação para evitar erro se o grupo não tiver quadra)
+                    //Prepara o DTO de endereço (com verificação para evitar erro se o grupo não tiver quadra)
                     EnderecoResponseDTO enderecoDTO = null;
                     if (grupo.getEndereco() != null) {
                         enderecoDTO = new EnderecoResponseDTO(
@@ -126,7 +127,7 @@ public class GrupoPeladaService {
                         );
                     }
 
-                    // 2. Retorna o DTO do Grupo
+                    //Retorna o DTO do Grupo
                     return new GrupoPeladaResponseDTO(
                             grupo.getId(),
                             grupo.getNome(),

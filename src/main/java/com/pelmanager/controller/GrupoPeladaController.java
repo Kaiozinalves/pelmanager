@@ -1,6 +1,6 @@
 package com.pelmanager.controller;
 
-import com.pelmanager.dto.EntrarGrupoPeladaRequestDTO;
+import com.pelmanager.dto.request.EntrarGrupoPeladaRequestDTO;
 import com.pelmanager.dto.GrupoPeladaDetalhesResponseDTO;
 import com.pelmanager.dto.request.GrupoPeladaRequestDTO;
 import com.pelmanager.dto.GrupoPeladaResponseDTO;
