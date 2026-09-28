@@ -54,4 +54,14 @@ public class GlobalExceptionHandler extends RuntimeException {
     return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
   }
 
+  @ExceptionHandler(CheckInDuplicadoException.class)
+  public ResponseEntity<ErroResponseDTO> tratarCheckInDuplicado(CheckInDuplicadoException ex) {
+    ErroResponseDTO erro = new ErroResponseDTO(
+            LocalDateTime.now(),
+            HttpStatus.CONFLICT.value(),
+            ex.getMessage()
+    );
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
+  }
+
 }

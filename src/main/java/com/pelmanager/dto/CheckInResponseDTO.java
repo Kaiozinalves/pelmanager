@@ -5,6 +5,7 @@ public record CheckInResponseDTO(
         Long rodadaId,
         Long usuarioId,
         String usuarioNome,
-        String status
+        java.time.LocalDateTime dataHoraCheckin,
+        com.pelmanager.entity.enums.StatusCheckIn status
 ) {
 }
