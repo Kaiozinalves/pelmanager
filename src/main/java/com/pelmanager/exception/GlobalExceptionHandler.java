@@ -64,4 +64,14 @@ public class GlobalExceptionHandler extends RuntimeException {
     return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
   }
 
+  @ExceptionHandler(RodadaNaoEncontradaException.class)
+  public ResponseEntity<ErroResponseDTO> tratarRodadaNaoEncontrada(RodadaNaoEncontradaException ex) {
+    ErroResponseDTO erro = new ErroResponseDTO(
+            LocalDateTime.now(),
+            HttpStatus.NOT_FOUND.value(),
+            ex.getMessage()
+    );
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
+  }
+
 }

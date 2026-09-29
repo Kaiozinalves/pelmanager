@@ -1,12 +1,14 @@
 package com.pelmanager.service;
 
 import com.pelmanager.dto.CheckInResponseDTO;
+import com.pelmanager.dto.ParticipanteCheckInResponseDTO;
 import com.pelmanager.dto.request.CheckInRequestDTO;
 import com.pelmanager.entity.CheckIn;
 import com.pelmanager.entity.Rodada;
 import com.pelmanager.entity.Usuario;
 import com.pelmanager.entity.enums.StatusCheckIn;
 import com.pelmanager.exception.CheckInDuplicadoException;
+import com.pelmanager.exception.RodadaNaoEncontradaException;
 import com.pelmanager.repository.CheckInRepository;
 import com.pelmanager.repository.ParticipanteRepository;
 import com.pelmanager.repository.RodadaRepository;
@@ -15,6 +17,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -36,7 +39,7 @@ public class CheckInService {
     public CheckInResponseDTO realizarCheckIn(CheckInRequestDTO checkInRequestDTO) {
         Optional<Rodada> rodada = rodadaRepository.findById(checkInRequestDTO.rodadaId());
         if (rodada.isEmpty()) {
-            throw new RuntimeException("Rodada não encontrada");
+            throw new RodadaNaoEncontradaException(checkInRequestDTO.rodadaId());
         }
 
         Rodada rodada1 = rodada.get();
@@ -71,6 +74,28 @@ public class CheckInService {
                 checkInSalvo.getDataHoraCheckin(),
                 checkInSalvo.getStatus()
         );
+    }
+
+    public List<ParticipanteCheckInResponseDTO> listarStatusDaRodada(Long rodadaId) {
+        Rodada rodada = rodadaRepository.findById(rodadaId)
+                .orElseThrow(() -> new RodadaNaoEncontradaException(rodadaId));
+
+        return rodada.getGrupo().getParticipantes().stream()
+                .map(participante -> {
+                    Usuario usuario = participante.getUsuario();
+                    Optional<CheckIn> checkIn = checkInRepository.findByRodadaIdAndUsuarioId(rodadaId, usuario.getId());
+
+                    String status = checkIn.isPresent() ? checkIn.get().getStatus().name() : "PENDENTE";
+
+                    return new ParticipanteCheckInResponseDTO(
+                            usuario.getId(),
+                            usuario.getNome(),
+                            usuario.getApelido(),
+                            usuario.getPosicaoPrimaria(),
+                            status
+                    );
+                })
+                .toList();
     }
 }
 
