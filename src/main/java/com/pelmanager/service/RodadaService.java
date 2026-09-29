@@ -5,6 +5,7 @@ import com.pelmanager.entity.GrupoPelada;
 import com.pelmanager.entity.Rodada;
 import com.pelmanager.entity.enums.StatusRodada;
 import com.pelmanager.exception.RodadaAtivaExistenteException;
+import com.pelmanager.exception.RodadaNaoEncontradaException;
 import com.pelmanager.repository.EnderecoRepository;
 import com.pelmanager.repository.GrupoPeladaRepository;
 import com.pelmanager.repository.RodadaRepository;
@@ -48,5 +49,18 @@ public class RodadaService {
         }
 
         rodadaRepository.save(novaRodada);
+    }
+
+    @Transactional
+    public void finalizarRodada(Long rodadaId) {
+        Rodada rodada = rodadaRepository.findById(rodadaId)
+                .orElseThrow(() -> new RodadaNaoEncontradaException(rodadaId));
+
+        if (rodada.getStatusRodada() == StatusRodada.FINALIZADA) {
+            throw new RuntimeException("Esta rodada já está finalizada.");
+        }
+
+        rodada.setStatusRodada(StatusRodada.FINALIZADA);
+        rodadaRepository.save(rodada);
     }
 }

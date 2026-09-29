@@ -40,4 +40,10 @@ public class Usuario {
     @Enumerated(EnumType.STRING)
     @Column(name = "posicao_secundaria", length = 20)
     private Posicao posicaoSecundaria;
+
+    @OneToMany(mappedBy = "avaliador", cascade = CascadeType.ALL)
+    private List<Avaliacao> avaliacoesFeitas;
+
+    @OneToMany(mappedBy = "avaliado", cascade = CascadeType.ALL)
+    private List<Avaliacao> avaliacoesRecebidas;
 }

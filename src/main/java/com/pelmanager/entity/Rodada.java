@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Entity
 @Table(name = "rodadas")
@@ -35,6 +36,9 @@ public class Rodada {
         }
         return this.grupo.getEndereco();
     }
+
+    @OneToMany(mappedBy = "rodada", cascade = CascadeType.ALL)
+    private List<Avaliacao> avaliacoes;
 
     //A rodada inicia quando o checkin é encerrado
     public boolean estaAberta() {
