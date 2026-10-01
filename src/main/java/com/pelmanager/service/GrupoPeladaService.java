@@ -13,6 +13,7 @@ import com.pelmanager.exception.CodigoConviteInvalidoException;
 import com.pelmanager.exception.UsuarioJaParticipaException;
 import com.pelmanager.repository.GrupoPeladaRepository;
 import com.pelmanager.repository.ParticipanteRepository;
+import com.pelmanager.repository.RodadaRepository;
 import com.pelmanager.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -27,13 +28,16 @@ public class GrupoPeladaService {
     private final GrupoPeladaRepository grupoRepository;
     private final UsuarioRepository usuarioRepository;
     private final ParticipanteRepository participanteRepository;
+    private final RodadaRepository rodadaRepository;
 
     public GrupoPeladaService(GrupoPeladaRepository grupoRepository,
                               UsuarioRepository usuarioRepository,
-                              ParticipanteRepository participanteRepository) {
+                              ParticipanteRepository participanteRepository,
+                              RodadaRepository rodadaRepository) {
         this.grupoRepository = grupoRepository;
         this.usuarioRepository = usuarioRepository;
         this.participanteRepository = participanteRepository;
+        this.rodadaRepository = rodadaRepository;
     }
 
     @Transactional
@@ -153,12 +157,23 @@ public class GrupoPeladaService {
                 ))
                 .toList();
 
+        List<RodadaResponseDTO> rodadas = rodadaRepository.findByGrupoIdOrderByIdDesc(id).stream()
+                .map(rodada -> new RodadaResponseDTO(
+                        rodada.getId(),
+                        grupo.getId(),
+                        rodada.getDataRodada(),
+                        rodada.getHoraRodada(),
+                        rodada.getStatusRodada().name()
+                ))
+                .toList();
+
         return new GrupoPeladaDetalhesResponseDTO(
                 grupo.getId(),
                 grupo.getNome(),
                 grupo.getCodigoConvite(),
                 grupo.getDataCriacao(),
-                participantes
+                participantes,
+                rodadas
         );
     }
 

@@ -6,6 +6,7 @@ import { Cadastro } from "./pages/Cadastro";
 import { Home } from "./pages/Home";
 import { Perfil } from "./pages/Perfil";
 import { GrupoDetalhes } from "./pages/GrupoDetalhes";
+import { Rodada } from "./pages/Rodada";
 
 function App() {
   return (
@@ -35,6 +36,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <GrupoDetalhes />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/grupos/:grupoId/rodadas/:rodadaId"
+            element={
+              <ProtectedRoute>
+                <Rodada />
               </ProtectedRoute>
             }
           />

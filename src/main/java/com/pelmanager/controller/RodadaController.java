@@ -1,5 +1,6 @@
 package com.pelmanager.controller;
 
+import com.pelmanager.dto.RodadaResponseDTO;
 import com.pelmanager.dto.request.RodadaRequestDTO;
 import com.pelmanager.service.RodadaService;
 import org.springframework.http.HttpStatus;
@@ -17,9 +18,9 @@ public class RodadaController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> agendarRodada(@RequestBody RodadaRequestDTO dto) {
-        service.agendarRodada(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<RodadaResponseDTO> agendarRodada(@RequestBody RodadaRequestDTO dto) {
+        RodadaResponseDTO response = service.agendarRodada(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PatchMapping("/{id}/finalizar")

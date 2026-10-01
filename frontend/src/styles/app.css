@@ -391,3 +391,175 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- Página de Rodada (check-in / sorteio / avaliação) ---------- */
+.pagina-central--larga {
+  max-width: 900px;
+}
+
+.rodada-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--espaco-4);
+}
+
+.linha-acoes {
+  display: flex;
+  gap: var(--espaco-3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.linha-acoes--espaco {
+  margin-bottom: var(--espaco-4);
+}
+
+/* ---------- Badges de status (rodada / check-in) ---------- */
+.badge-status {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--cor-giz-forte);
+  color: var(--cor-tinta-suave);
+  white-space: nowrap;
+}
+
+.badge-status--agendada {
+  background: var(--cor-giz-forte);
+  color: var(--cor-tinta-suave);
+}
+
+.badge-status--em_andamento {
+  background: var(--cor-ouro);
+  color: var(--cor-tinta);
+}
+
+.badge-status--finalizada {
+  background: var(--cor-grama);
+  color: var(--cor-giz);
+}
+
+.badge-status--cancelada {
+  background: #F5E4E4;
+  color: var(--cor-erro);
+}
+
+.badge-checkin {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--cor-giz-forte);
+  color: var(--cor-tinta-suave);
+}
+
+.badge-checkin--confirmado {
+  background: var(--cor-grama);
+  color: var(--cor-giz);
+}
+
+/* ---------- Lista de rodadas (dentro do grupo) ---------- */
+.lista-rodadas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.item-rodada {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--espaco-3);
+  border: 1px solid var(--cor-linha);
+  border-radius: var(--raio-pequeno);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.item-rodada:hover {
+  border-color: var(--cor-grama);
+  background: var(--cor-giz-forte);
+}
+
+/* ---------- Times sorteados ---------- */
+.grid-times {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--espaco-4);
+  margin-top: var(--espaco-4);
+}
+
+.cartao-time {
+  border: 1.5px solid var(--cor-linha);
+  border-radius: var(--raio-medio);
+  padding: var(--espaco-4);
+}
+
+.cartao-time-titulo {
+  font-size: 18px;
+  color: var(--cor-grama-escura);
+  margin-bottom: var(--espaco-3);
+}
+
+.lista-jogadores-time {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.lista-jogadores-time li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  padding-bottom: var(--espaco-2);
+  border-bottom: 1px dashed var(--cor-linha);
+}
+
+.lista-jogadores-time li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* ---------- Avaliação de jogadores ---------- */
+.lista-avaliacao {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+}
+
+.item-avaliacao {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--espaco-3);
+  border: 1px solid var(--cor-linha);
+  border-radius: var(--raio-pequeno);
+  gap: var(--espaco-4);
+  flex-wrap: wrap;
+}
+
+.item-avaliacao-nome {
+  font-weight: 600;
+}
+
+.item-avaliacao-form {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--espaco-3);
+}
+
+.item-avaliacao-form .campo {
+  min-width: 80px;
+}
