@@ -9,5 +9,6 @@ public record GrupoPeladaDetalhesResponseDTO(
         String codigoConvite,
         LocalDateTime dataCriacao,
         List<ParticipanteResponseDTO> participantes,
-        List<RodadaResponseDTO> rodadas
+        List<RodadaResponseDTO> rodadas,
+        ConfiguracaoAvaliacaoDTO configuracaoAvaliacao
 ) {}

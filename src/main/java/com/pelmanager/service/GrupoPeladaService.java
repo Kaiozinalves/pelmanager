@@ -1,6 +1,7 @@
 package com.pelmanager.service;
 
 import com.pelmanager.dto.*;
+import com.pelmanager.dto.request.ConfiguracaoAvaliacaoRequestDTO;
 import com.pelmanager.dto.request.EntrarGrupoPeladaRequestDTO;
 import com.pelmanager.dto.request.GrupoPeladaRequestDTO;
 import com.pelmanager.entity.Endereco;
@@ -10,6 +11,8 @@ import com.pelmanager.entity.Usuario;
 // TODO: Lembre de importar o seu Enum aqui. Ex: import com.pelmanager.entity.enums.Papel;
 import com.pelmanager.entity.enums.Papel;
 import com.pelmanager.exception.CodigoConviteInvalidoException;
+import com.pelmanager.exception.RecursoNaoEncontradoException;
+import com.pelmanager.exception.RequisicaoInvalidaException;
 import com.pelmanager.exception.UsuarioJaParticipaException;
 import com.pelmanager.repository.GrupoPeladaRepository;
 import com.pelmanager.repository.ParticipanteRepository;
@@ -25,19 +28,24 @@ import java.util.UUID;
 @Service
 public class GrupoPeladaService {
 
+    private static final int PRAZO_MAXIMO_HORAS = 168; // 7 dias
+
     private final GrupoPeladaRepository grupoRepository;
     private final UsuarioRepository usuarioRepository;
     private final ParticipanteRepository participanteRepository;
     private final RodadaRepository rodadaRepository;
+    private final PermissaoService permissaoService;
 
     public GrupoPeladaService(GrupoPeladaRepository grupoRepository,
                               UsuarioRepository usuarioRepository,
                               ParticipanteRepository participanteRepository,
-                              RodadaRepository rodadaRepository) {
+                              RodadaRepository rodadaRepository,
+                              PermissaoService permissaoService) {
         this.grupoRepository = grupoRepository;
         this.usuarioRepository = usuarioRepository;
         this.participanteRepository = participanteRepository;
         this.rodadaRepository = rodadaRepository;
+        this.permissaoService = permissaoService;
     }
 
     @Transactional
@@ -173,7 +181,45 @@ public class GrupoPeladaService {
                 grupo.getCodigoConvite(),
                 grupo.getDataCriacao(),
                 participantes,
-                rodadas
+                rodadas,
+                paraConfiguracaoDTO(grupo)
+        );
+    }
+
+    @Transactional
+    public ConfiguracaoAvaliacaoDTO atualizarConfiguracaoAvaliacao(Long grupoId, ConfiguracaoAvaliacaoRequestDTO dto) {
+        GrupoPelada grupo = grupoRepository.findById(grupoId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pelada não encontrada."));
+
+        permissaoService.exigirAdmin(dto.usuarioId(), grupo);
+
+        if (dto.melhorJogadorAtiva() == null || dto.melhorAssistenteAtiva() == null
+                || dto.bagreAtiva() == null || dto.prazoHoras() == null) {
+            throw new RequisicaoInvalidaException("Informe todas as categorias e o prazo da votação.");
+        }
+        if (dto.prazoHoras() < 1 || dto.prazoHoras() > PRAZO_MAXIMO_HORAS) {
+            throw new RequisicaoInvalidaException(
+                    "O prazo da votação deve ficar entre 1 e " + PRAZO_MAXIMO_HORAS + " horas.");
+        }
+
+        grupo.setCategoriaMelhorAtiva(dto.melhorJogadorAtiva());
+        grupo.setCategoriaAssistenteAtiva(dto.melhorAssistenteAtiva());
+        grupo.setCategoriaBagreAtiva(dto.bagreAtiva());
+        if (dto.revelacaoAtiva() != null) {
+            grupo.setCategoriaRevelacaoAtiva(dto.revelacaoAtiva());
+        }
+        grupo.setPrazoAvaliacaoHoras(dto.prazoHoras());
+
+        return paraConfiguracaoDTO(grupoRepository.save(grupo));
+    }
+
+    private ConfiguracaoAvaliacaoDTO paraConfiguracaoDTO(GrupoPelada grupo) {
+        return new ConfiguracaoAvaliacaoDTO(
+                grupo.isCategoriaMelhorAtiva(),
+                grupo.isCategoriaAssistenteAtiva(),
+                grupo.isCategoriaBagreAtiva(),
+                grupo.isCategoriaRevelacaoAtiva(),
+                grupo.getPrazoAvaliacaoHoras()
         );
     }
 

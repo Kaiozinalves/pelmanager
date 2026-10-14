@@ -1,5 +1,7 @@
 package com.pelmanager.controller;
 
+import com.pelmanager.dto.ConfiguracaoAvaliacaoDTO;
+import com.pelmanager.dto.request.ConfiguracaoAvaliacaoRequestDTO;
 import com.pelmanager.dto.request.EntrarGrupoPeladaRequestDTO;
 import com.pelmanager.dto.GrupoPeladaDetalhesResponseDTO;
 import com.pelmanager.dto.request.GrupoPeladaRequestDTO;
@@ -42,6 +44,14 @@ public class GrupoPeladaController {
     @GetMapping("/{id}")
     public ResponseEntity<GrupoPeladaDetalhesResponseDTO> buscarDetalhes(@PathVariable Long id) {
         return ResponseEntity.ok(service.buscarDetalhes(id));
+    }
+
+    // Categorias de votação ativas e prazo (somente admin do grupo).
+    @PutMapping("/{id}/configuracao-avaliacao")
+    public ResponseEntity<ConfiguracaoAvaliacaoDTO> atualizarConfiguracaoAvaliacao(
+            @PathVariable Long id,
+            @RequestBody ConfiguracaoAvaliacaoRequestDTO dto) {
+        return ResponseEntity.ok(service.atualizarConfiguracaoAvaliacao(id, dto));
     }
 }
 

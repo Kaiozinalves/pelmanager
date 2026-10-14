@@ -74,4 +74,29 @@ public class GlobalExceptionHandler extends RuntimeException {
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
   }
 
+  @ExceptionHandler(AcessoNegadoException.class)
+  public ResponseEntity<ErroResponseDTO> tratarAcessoNegado(AcessoNegadoException ex) {
+    return montarErro(HttpStatus.FORBIDDEN, ex.getMessage());
+  }
+
+  @ExceptionHandler(RequisicaoInvalidaException.class)
+  public ResponseEntity<ErroResponseDTO> tratarRequisicaoInvalida(RequisicaoInvalidaException ex) {
+    return montarErro(HttpStatus.BAD_REQUEST, ex.getMessage());
+  }
+
+  @ExceptionHandler(OperacaoInvalidaException.class)
+  public ResponseEntity<ErroResponseDTO> tratarOperacaoInvalida(OperacaoInvalidaException ex) {
+    return montarErro(HttpStatus.CONFLICT, ex.getMessage());
+  }
+
+  @ExceptionHandler(RecursoNaoEncontradoException.class)
+  public ResponseEntity<ErroResponseDTO> tratarRecursoNaoEncontrado(RecursoNaoEncontradoException ex) {
+    return montarErro(HttpStatus.NOT_FOUND, ex.getMessage());
+  }
+
+  private ResponseEntity<ErroResponseDTO> montarErro(HttpStatus status, String mensagem) {
+    ErroResponseDTO erro = new ErroResponseDTO(LocalDateTime.now(), status.value(), mensagem);
+    return ResponseEntity.status(status).body(erro);
+  }
+
 }

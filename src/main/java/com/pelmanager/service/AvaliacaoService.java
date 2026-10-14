@@ -7,6 +7,7 @@ import com.pelmanager.entity.Rodada;
 import com.pelmanager.entity.Usuario;
 import com.pelmanager.entity.enums.StatusRodada;
 import com.pelmanager.exception.RodadaNaoEncontradaException;
+import com.pelmanager.exception.RequisicaoInvalidaException;
 import com.pelmanager.repository.AvaliacaoRepository;
 import com.pelmanager.repository.RodadaRepository;
 import com.pelmanager.repository.UsuarioRepository;
@@ -21,13 +22,16 @@ public class AvaliacaoService {
     private final AvaliacaoRepository avaliacaoRepository;
     private final RodadaRepository rodadaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final PermissaoService permissaoService;
 
     public AvaliacaoService(AvaliacaoRepository avaliacaoRepository,
                             RodadaRepository rodadaRepository,
-                            UsuarioRepository usuarioRepository) {
+                            UsuarioRepository usuarioRepository,
+                            PermissaoService permissaoService) {
         this.avaliacaoRepository = avaliacaoRepository;
         this.rodadaRepository = rodadaRepository;
         this.usuarioRepository = usuarioRepository;
+        this.permissaoService = permissaoService;
     }
 
     @Transactional
@@ -45,6 +49,17 @@ public class AvaliacaoService {
 
         Usuario avaliado = usuarioRepository.findById(dto.avaliadoId())
                 .orElseThrow(() -> new RuntimeException("Jogador avaliado não encontrado."));
+
+        if (dto.nota() == null || dto.nota() < 1 || dto.nota() > 5) {
+            throw new RequisicaoInvalidaException("A nota deve ficar entre 1 e 5.");
+        }
+        if (avaliador.getId().equals(avaliado.getId())) {
+            throw new RequisicaoInvalidaException("Você não pode avaliar a si mesmo.");
+        }
+        if (!permissaoService.temCheckInConfirmado(rodada.getId(), avaliador.getId())
+                || !permissaoService.temCheckInConfirmado(rodada.getId(), avaliado.getId())) {
+            throw new RequisicaoInvalidaException("Só jogadores confirmados nesta rodada podem participar da avaliação.");
+        }
 
         if (avaliacaoRepository.existsByRodadaIdAndAvaliadorIdAndAvaliadoId(rodada.getId(), avaliador.getId(), avaliado.getId())) {
             throw new RuntimeException("Você já avaliou este jogador nesta rodada.");

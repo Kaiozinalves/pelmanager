@@ -7,6 +7,7 @@ import com.pelmanager.entity.CheckIn;
 import com.pelmanager.entity.Rodada;
 import com.pelmanager.entity.Usuario;
 import com.pelmanager.entity.enums.StatusCheckIn;
+import com.pelmanager.entity.enums.StatusRodada;
 import com.pelmanager.exception.CheckInDuplicadoException;
 import com.pelmanager.exception.RodadaNaoEncontradaException;
 import com.pelmanager.repository.CheckInRepository;
@@ -26,13 +27,16 @@ public class CheckInService {
     private final RodadaRepository rodadaRepository;
     private final UsuarioRepository usuarioRepository;
     private final ParticipanteRepository participanteRepository;
+    private final PermissaoService permissaoService;
 
     public CheckInService(CheckInRepository checkInRepository, RodadaRepository rodadaRepository,
-                          UsuarioRepository usuarioRepository, ParticipanteRepository participanteRepository) {
+                          UsuarioRepository usuarioRepository, ParticipanteRepository participanteRepository,
+                          PermissaoService permissaoService) {
         this.checkInRepository = checkInRepository;
         this.rodadaRepository = rodadaRepository;
         this.usuarioRepository = usuarioRepository;
         this.participanteRepository = participanteRepository;
+        this.permissaoService = permissaoService;
     }
 
     @Transactional
@@ -96,6 +100,43 @@ public class CheckInService {
                     );
                 })
                 .toList();
+    }
+
+    @Transactional
+    public List<ParticipanteCheckInResponseDTO> confirmarTodos(Long rodadaId, Long usuarioAdminId) {
+        Rodada rodada = rodadaRepository.findById(rodadaId)
+                .orElseThrow(() -> new RodadaNaoEncontradaException(rodadaId));
+        permissaoService.exigirAdmin(usuarioAdminId, rodada.getGrupo());
+
+        if (rodada.getStatusRodada() != StatusRodada.AGENDADA) {
+            throw new RuntimeException("Só é possível confirmar todos enquanto a rodada está agendada.");
+        }
+
+        LocalDateTime agora = LocalDateTime.now();
+        for (var participante : rodada.getGrupo().getParticipantes()) {
+            Usuario usuario = participante.getUsuario();
+            Optional<CheckIn> checkInExistente = checkInRepository.findByRodadaIdAndUsuarioId(
+                    rodadaId, usuario.getId());
+
+            if (checkInExistente.isPresent()) {
+                CheckIn checkIn = checkInExistente.get();
+                if (checkIn.getStatus() != StatusCheckIn.CONFIRMADO) {
+                    checkIn.setStatus(StatusCheckIn.CONFIRMADO);
+                    checkIn.setDataHoraCheckin(agora);
+                    checkInRepository.save(checkIn);
+                }
+                continue;
+            }
+
+            CheckIn checkIn = new CheckIn();
+            checkIn.setRodada(rodada);
+            checkIn.setUsuario(usuario);
+            checkIn.setDataHoraCheckin(agora);
+            checkIn.setStatus(StatusCheckIn.CONFIRMADO);
+            checkInRepository.save(checkIn);
+        }
+
+        return listarStatusDaRodada(rodadaId);
     }
 }
 

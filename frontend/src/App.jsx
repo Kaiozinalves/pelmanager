@@ -7,6 +7,7 @@ import { Home } from "./pages/Home";
 import { Perfil } from "./pages/Perfil";
 import { GrupoDetalhes } from "./pages/GrupoDetalhes";
 import { Rodada } from "./pages/Rodada";
+import { WrappedRodada } from "./pages/WrappedRodada";
 
 function App() {
   return (
@@ -44,6 +45,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Rodada />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/grupos/:grupoId/rodadas/:rodadaId/wrapped"
+            element={
+              <ProtectedRoute>
+                <WrappedRodada />
               </ProtectedRoute>
             }
           />

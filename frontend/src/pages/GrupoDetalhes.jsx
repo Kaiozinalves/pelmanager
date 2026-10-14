@@ -2,7 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
-import { buscarDetalhesGrupo } from "../api/grupo";
+import { TabelasEstatisticas } from "../components/TabelasEstatisticas";
+import { useAuth } from "../context/AuthContext";
+import { atualizarConfiguracaoAvaliacao, buscarDetalhesGrupo } from "../api/grupo";
+import { estatisticasDoGrupo } from "../api/gol";
 import { agendarRodada } from "../api/rodada";
 import { extrairMensagemErro } from "../constants/enums";
 
@@ -20,6 +23,7 @@ const STATUS_RODADA_ROTULO = {
 
 export function GrupoDetalhes() {
   const { id } = useParams();
+  const { usuario } = useAuth();
 
   const [grupo, setGrupo] = useState(null);
   const [carregando, setCarregando] = useState(true);
@@ -30,6 +34,12 @@ export function GrupoDetalhes() {
   const [agendando, setAgendando] = useState(false);
   const [erroAgendar, setErroAgendar] = useState(null);
   const [rodadaRecemCriada, setRodadaRecemCriada] = useState(null);
+
+  const [estatisticas, setEstatisticas] = useState(null);
+  const [configuracao, setConfiguracao] = useState(null);
+  const [salvandoConfiguracao, setSalvandoConfiguracao] = useState(false);
+  const [erroConfiguracao, setErroConfiguracao] = useState(null);
+  const [configuracaoSalva, setConfiguracaoSalva] = useState(false);
 
   // Única fonte de verdade: sempre busca do backend. Chamada no carregamento
   // da página e de novo depois de agendar uma rodada, pra lista nunca ficar
@@ -47,6 +57,58 @@ export function GrupoDetalhes() {
     setCarregando(true);
     carregarGrupo().finally(() => setCarregando(false));
   }, [carregarGrupo]);
+
+  const ehAdmin =
+    grupo?.participantes?.find((p) => p.usuarioId === usuario.id)?.papel === "ADMIN";
+
+  // Estatísticas (artilharia/assistências) somando todas as rodadas do grupo.
+  useEffect(() => {
+    estatisticasDoGrupo(id)
+      .then(setEstatisticas)
+      .catch(() => setEstatisticas(null));
+  }, [id]);
+
+  // Copia a configuração salva para o formulário (prazo como string para o input).
+  useEffect(() => {
+    const salva = grupo?.configuracaoAvaliacao;
+    if (salva) {
+      setConfiguracao({ ...salva, prazoHoras: String(salva.prazoHoras) });
+    }
+  }, [grupo]);
+
+  function atualizarConfiguracao(campo, valor) {
+    setConfiguracaoSalva(false);
+    setConfiguracao((atual) => ({ ...atual, [campo]: valor }));
+  }
+
+  async function aoSalvarConfiguracao(evento) {
+    evento.preventDefault();
+    setErroConfiguracao(null);
+    setConfiguracaoSalva(false);
+
+    const prazo = Number(configuracao.prazoHoras);
+    if (!Number.isInteger(prazo) || prazo < 1 || prazo > 168) {
+      setErroConfiguracao("Informe um prazo inteiro entre 1 e 168 horas.");
+      return;
+    }
+
+    setSalvandoConfiguracao(true);
+    try {
+      await atualizarConfiguracaoAvaliacao(Number(id), {
+        usuarioId: usuario.id,
+        melhorJogadorAtiva: configuracao.melhorJogadorAtiva,
+        melhorAssistenteAtiva: configuracao.melhorAssistenteAtiva,
+        bagreAtiva: configuracao.bagreAtiva,
+        prazoHoras: prazo,
+      });
+      setConfiguracaoSalva(true);
+      await carregarGrupo();
+    } catch (err) {
+      setErroConfiguracao(extrairMensagemErro(err, "Não foi possível salvar a configuração agora."));
+    } finally {
+      setSalvandoConfiguracao(false);
+    }
+  }
 
   async function aoAgendarRodada(evento) {
     evento.preventDefault();
@@ -136,6 +198,82 @@ export function GrupoDetalhes() {
               )}
             </section>
 
+            <section className="painel painel--form">
+              <h2 className="painel-titulo">Estatísticas da pelada</h2>
+              {estatisticas && estatisticas.totalGols > 0 ? (
+                <TabelasEstatisticas estatisticas={estatisticas} />
+              ) : (
+                <p className="texto-suave">
+                  Nenhum gol registrado ainda. As tabelas aparecem conforme os gols são lançados nas rodadas.
+                </p>
+              )}
+            </section>
+
+            {ehAdmin && configuracao && (
+              <section className="painel painel--form">
+                <h2 className="painel-titulo">Votação de fim de rodada</h2>
+                <p className="texto-suave texto-suave--nota">
+                  Escolha quais categorias os jogadores votam depois que a rodada termina. A mudança vale
+                  para as próximas rodadas finalizadas.
+                </p>
+
+                <form className="formulario" onSubmit={aoSalvarConfiguracao} noValidate>
+                  <label className="opcao-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={configuracao.melhorJogadorAtiva}
+                      onChange={(e) => atualizarConfiguracao("melhorJogadorAtiva", e.target.checked)}
+                    />
+                    Melhor jogador da rodada
+                  </label>
+                  <label className="opcao-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={configuracao.melhorAssistenteAtiva}
+                      onChange={(e) => atualizarConfiguracao("melhorAssistenteAtiva", e.target.checked)}
+                    />
+                    Melhor assistente da rodada
+                  </label>
+                  <label className="opcao-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={configuracao.bagreAtiva}
+                      onChange={(e) => atualizarConfiguracao("bagreAtiva", e.target.checked)}
+                    />
+                    Bagre da rodada
+                  </label>
+                  <p className="texto-suave texto-suave--nota">
+                    O “bagre” é uma brincadeira que pode soar constrangedora em alguns grupos, por isso vem
+                    desligado por padrão.
+                  </p>
+
+                  <Input
+                    id="prazo-votacao"
+                    label="Prazo da votação (horas)"
+                    type="number"
+                    min="1"
+                    max="168"
+                    value={configuracao.prazoHoras}
+                    onChange={(e) => atualizarConfiguracao("prazoHoras", e.target.value)}
+                  />
+
+                  {erroConfiguracao && (
+                    <p className="mensagem-erro" role="alert">
+                      {erroConfiguracao}
+                    </p>
+                  )}
+                  {configuracaoSalva && (
+                    <p className="mensagem-sucesso" role="status">
+                      Configuração salva.
+                    </p>
+                  )}
+
+                  <Button type="submit" carregando={salvandoConfiguracao}>
+                    Salvar configuração
+                  </Button>
+                </form>
+              </section>
+            )}
             <section className="painel painel--form">
               <h2 className="painel-titulo">Agendar rodada</h2>
 

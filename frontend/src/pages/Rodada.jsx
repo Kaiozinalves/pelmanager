@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Button } from "../components/Button";
-import { Select } from "../components/Input";
+import { GolsRodada } from "../components/GolsRodada";
 import { buscarDetalhesGrupo } from "../api/grupo";
-import { finalizarRodada } from "../api/rodada";
-import { confirmarPresenca, listarCheckinsDaRodada } from "../api/checkin";
+import { finalizarRodada, iniciarRodada } from "../api/rodada";
+import { confirmarPresenca, confirmarTodos, listarCheckinsDaRodada } from "../api/checkin";
 import { buscarTimesDaRodada, sortearAleatorio, sortearBalanceado } from "../api/sorteio";
-import { avaliarJogador, listarAvaliacoesDaRodada } from "../api/avaliacao";
 import { POSICOES, extrairMensagemErro } from "../constants/enums";
 
 const POSICAO_ROTULO = Object.fromEntries(POSICOES.map((p) => [p.valor, p.rotulo]));
@@ -21,6 +20,7 @@ const STATUS_ROTULO = {
 
 export function Rodada() {
   const { grupoId, rodadaId } = useParams();
+  const navigate = useNavigate();
   const { usuario } = useAuth();
   const rodadaIdNum = Number(rodadaId);
 
@@ -31,6 +31,7 @@ export function Rodada() {
   const [checkins, setCheckins] = useState([]);
   const [carregandoCheckins, setCarregandoCheckins] = useState(true);
   const [fazendoCheckin, setFazendoCheckin] = useState(false);
+  const [confirmandoTodos, setConfirmandoTodos] = useState(false);
   const [erroCheckin, setErroCheckin] = useState(null);
 
   const [times, setTimes] = useState([]);
@@ -38,16 +39,15 @@ export function Rodada() {
   const [sorteando, setSorteando] = useState(null); // "aleatorio" | "balanceado" | null
   const [erroSorteio, setErroSorteio] = useState(null);
 
+  const [iniciando, setIniciando] = useState(false);
   const [finalizando, setFinalizando] = useState(false);
-  const [erroFinalizar, setErroFinalizar] = useState(null);
+  const [erroTransicao, setErroTransicao] = useState(null);
 
-  const [avaliacoes, setAvaliacoes] = useState([]);
-  const [carregandoAvaliacoes, setCarregandoAvaliacoes] = useState(true);
-  const [formsAvaliacao, setFormsAvaliacao] = useState({});
-  const [avaliandoId, setAvaliandoId] = useState(null);
-  const [erroAvaliar, setErroAvaliar] = useState(null);
 
   const rodada = grupo?.rodadas?.find((r) => r.id === rodadaIdNum) || null;
+  const ehAdmin =
+    grupo?.participantes?.find((p) => p.usuarioId === usuario.id)?.papel === "ADMIN";
+  const jogadoresConfirmados = checkins.filter((c) => c.statusCheckIn === "CONFIRMADO");
 
   const carregarGrupo = useCallback(async () => {
     try {
@@ -76,15 +76,6 @@ export function Rodada() {
     }
   }, [rodadaIdNum]);
 
-  const carregarAvaliacoes = useCallback(async () => {
-    try {
-      const dados = await listarAvaliacoesDaRodada(rodadaIdNum);
-      setAvaliacoes(dados);
-    } catch {
-      setAvaliacoes([]);
-    }
-  }, [rodadaIdNum]);
-
   useEffect(() => {
     setCarregandoGrupo(true);
     carregarGrupo().finally(() => setCarregandoGrupo(false));
@@ -95,9 +86,7 @@ export function Rodada() {
     carregarCheckins().finally(() => setCarregandoCheckins(false));
     setCarregandoTimes(true);
     carregarTimes().finally(() => setCarregandoTimes(false));
-    setCarregandoAvaliacoes(true);
-    carregarAvaliacoes().finally(() => setCarregandoAvaliacoes(false));
-  }, [carregarCheckins, carregarTimes, carregarAvaliacoes]);
+  }, [carregarCheckins, carregarTimes]);
 
   const meuCheckin = checkins.find((c) => c.usuarioId === usuario.id);
   const jaConfirmou = meuCheckin?.statusCheckIn === "CONFIRMADO";
@@ -112,6 +101,19 @@ export function Rodada() {
       setErroCheckin(extrairMensagemErro(err, "Não foi possível confirmar sua presença agora."));
     } finally {
       setFazendoCheckin(false);
+    }
+  }
+
+  async function aoConfirmarTodos() {
+    setErroCheckin(null);
+    setConfirmandoTodos(true);
+    try {
+      await confirmarTodos({ rodadaId: rodadaIdNum, usuarioId: usuario.id });
+      await carregarCheckins();
+    } catch (err) {
+      setErroCheckin(extrairMensagemErro(err, "Não foi possível confirmar todos os membros agora."));
+    } finally {
+      setConfirmandoTodos(false);
     }
   }
 
@@ -131,53 +133,31 @@ export function Rodada() {
     }
   }
 
-  async function aoFinalizarRodada() {
-    setErroFinalizar(null);
-    setFinalizando(true);
+  async function aoIniciarRodada() {
+    setErroTransicao(null);
+    setIniciando(true);
     try {
-      await finalizarRodada(rodadaIdNum);
+      await iniciarRodada(rodadaIdNum, usuario.id);
       await carregarGrupo();
     } catch (err) {
-      setErroFinalizar(extrairMensagemErro(err, "Não foi possível finalizar a rodada agora."));
+      setErroTransicao(extrairMensagemErro(err, "Não foi possível iniciar a rodada agora."));
+    } finally {
+      setIniciando(false);
+    }
+  }
+
+  async function aoFinalizarRodada() {
+    setErroTransicao(null);
+    setFinalizando(true);
+    try {
+      await finalizarRodada(rodadaIdNum, usuario.id);
+      navigate(`/grupos/${grupoId}/rodadas/${rodadaIdNum}/wrapped`);
+    } catch (err) {
+      setErroTransicao(extrairMensagemErro(err, "Não foi possível finalizar a rodada agora."));
     } finally {
       setFinalizando(false);
     }
   }
-
-  function atualizarFormAvaliacao(usuarioId, campo, valor) {
-    setFormsAvaliacao((atual) => ({
-      ...atual,
-      [usuarioId]: { nota: "5", comentario: "", ...atual[usuarioId], [campo]: valor },
-    }));
-  }
-
-  async function aoAvaliar(jogadorAvaliadoId) {
-    setErroAvaliar(null);
-    setAvaliandoId(jogadorAvaliadoId);
-    const form = formsAvaliacao[jogadorAvaliadoId] || { nota: "5", comentario: "" };
-    try {
-      await avaliarJogador({
-        rodadaId: rodadaIdNum,
-        avaliadorId: usuario.id,
-        avaliadoId: jogadorAvaliadoId,
-        nota: Number(form.nota),
-        comentario: form.comentario || null,
-      });
-      await carregarAvaliacoes();
-    } catch (err) {
-      setErroAvaliar(extrairMensagemErro(err, "Não foi possível registrar essa avaliação agora."));
-    } finally {
-      setAvaliandoId(null);
-    }
-  }
-
-  const idsJaAvaliados = new Set(
-    avaliacoes.filter((a) => a.avaliadorId === usuario.id).map((a) => a.avaliadoId)
-  );
-
-  const jogadoresParaAvaliar = checkins.filter(
-    (c) => c.statusCheckIn === "CONFIRMADO" && c.usuarioId !== usuario.id
-  );
 
   return (
     <div className="home">
@@ -215,24 +195,62 @@ export function Rodada() {
                 </span>
               </div>
 
-              {rodada.status !== "FINALIZADA" && (
+              {rodada.status === "FINALIZADA" && (
+                <Button onClick={() => navigate(`/grupos/${grupoId}/rodadas/${rodadaIdNum}/wrapped`)}>
+                  Abrir votação e Wrapped
+                </Button>
+              )}
+
+              {rodada.status !== "FINALIZADA" && rodada.status !== "CANCELADA" && (
                 <>
-                  {erroFinalizar && (
+                  {erroTransicao && (
                     <p className="mensagem-erro" role="alert">
-                      {erroFinalizar}
+                      {erroTransicao}
                     </p>
                   )}
-                  <div className="linha-acoes">
-                    <Button variante="secundario" carregando={finalizando} onClick={aoFinalizarRodada}>
-                      Finalizar rodada
-                    </Button>
-                  </div>
+                  {ehAdmin ? (
+                    <div className="linha-acoes">
+                      {rodada.status === "AGENDADA" && (
+                        <Button carregando={iniciando} onClick={aoIniciarRodada}>
+                          Iniciar rodada
+                        </Button>
+                      )}
+                      {rodada.status === "EM_ANDAMENTO" && (
+                        <Button variante="secundario" carregando={finalizando} onClick={aoFinalizarRodada}>
+                          Finalizar rodada
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="texto-suave texto-suave--nota">
+                      Só um admin da pelada pode iniciar e finalizar a rodada.
+                    </p>
+                  )}
+                  {rodada.status === "AGENDADA" && ehAdmin && (
+                    <p className="texto-suave texto-suave--nota">
+                      Iniciar a rodada fecha o check-in. Ao finalizar, a votação é aberta.
+                    </p>
+                  )}
                 </>
               )}
             </section>
 
             <section className="painel">
               <h3 className="subtitulo-secao">Check-in</h3>
+
+              {rodada.status === "AGENDADA" && ehAdmin &&
+                checkins.some((c) => c.statusCheckIn !== "CONFIRMADO") && (
+                  <div className="linha-acoes linha-acoes--espaco">
+                    {erroCheckin && (
+                      <p className="mensagem-erro" role="alert">
+                        {erroCheckin}
+                      </p>
+                    )}
+                    <Button carregando={confirmandoTodos} onClick={aoConfirmarTodos}>
+                      Confirmar todos
+                    </Button>
+                  </div>
+                )}
 
               {!jaConfirmou && rodada.status === "AGENDADA" && (
                 <div className="linha-acoes linha-acoes--espaco">
@@ -330,66 +348,17 @@ export function Rodada() {
               )}
             </section>
 
-            {rodada.status === "FINALIZADA" && (
-              <section className="painel">
-                <h3 className="subtitulo-secao">Avaliar jogadores</h3>
-
-                {erroAvaliar && (
-                  <p className="mensagem-erro" role="alert">
-                    {erroAvaliar}
-                  </p>
-                )}
-
-                {carregandoAvaliacoes && <p className="texto-suave">Carregando…</p>}
-
-                {!carregandoAvaliacoes && jogadoresParaAvaliar.length === 0 && (
-                  <p className="texto-suave">Ninguém pra avaliar por aqui ainda.</p>
-                )}
-
-                {!carregandoAvaliacoes && jogadoresParaAvaliar.length > 0 && (
-                  <ul className="lista-avaliacao">
-                    {jogadoresParaAvaliar.map((j) => {
-                      const jaAvaliado = idsJaAvaliados.has(j.usuarioId);
-                      const form = formsAvaliacao[j.usuarioId] || { nota: "5", comentario: "" };
-
-                      return (
-                        <li key={j.usuarioId} className="item-avaliacao">
-                          <span className="item-avaliacao-nome">{j.nome || j.apelido}</span>
-
-                          {jaAvaliado ? (
-                            <span className="badge-checkin badge-checkin--confirmado">Avaliado</span>
-                          ) : (
-                            <div className="item-avaliacao-form">
-                              <Select
-                                id={`nota-${j.usuarioId}`}
-                                label="Nota"
-                                value={form.nota}
-                                onChange={(e) =>
-                                  atualizarFormAvaliacao(j.usuarioId, "nota", e.target.value)
-                                }
-                              >
-                                {[1, 2, 3, 4, 5].map((n) => (
-                                  <option key={n} value={n}>
-                                    {n}
-                                  </option>
-                                ))}
-                              </Select>
-                              <Button
-                                variante="secundario"
-                                carregando={avaliandoId === j.usuarioId}
-                                onClick={() => aoAvaliar(j.usuarioId)}
-                              >
-                                Avaliar
-                              </Button>
-                            </div>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </section>
+            {(rodada.status === "EM_ANDAMENTO" || rodada.status === "FINALIZADA") && (
+              <GolsRodada
+                rodadaId={rodadaIdNum}
+                status={rodada.status}
+                usuarioId={usuario.id}
+                ehAdmin={ehAdmin}
+                jogadores={jogadoresConfirmados}
+                times={times}
+              />
             )}
+
           </>
         )}
       </main>

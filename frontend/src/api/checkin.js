@@ -13,3 +13,11 @@ export async function listarCheckinsDaRodada(rodadaId) {
   const { data } = await api.get(`/checkins/rodada/${rodadaId}`);
   return data;
 }
+
+// POST /api/checkins/rodada/{rodadaId}/confirmar-todos?usuarioId=... — ação de admin.
+export async function confirmarTodos({ rodadaId, usuarioId }) {
+  const { data } = await api.post(`/checkins/rodada/${rodadaId}/confirmar-todos`, null, {
+    params: { usuarioId },
+  });
+  return data;
+}

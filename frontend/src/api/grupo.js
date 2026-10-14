@@ -22,10 +22,28 @@ export async function listarMeusGrupos(usuarioId) {
   return data;
 }
 
-// GET /api/grupos/{id} — detalhes + lista de participantes.
+// GET /api/grupos/{id} — detalhes + lista de participantes + rodadas +
+// configuracaoAvaliacao ({ melhorJogadorAtiva, melhorAssistenteAtiva, bagreAtiva, prazoHoras }).
 // Atenção: esse retorno (GrupoPeladaDetalhesResponseDTO) NÃO inclui
 // endereço, diferente do retorno de /meus.
 export async function buscarDetalhesGrupo(id) {
   const { data } = await api.get(`/grupos/${id}`);
   return data;
 }
+
+// PUT /api/grupos/{id}/configuracao-avaliacao — somente admin do grupo.
+export async function atualizarConfiguracaoAvaliacao(
+  id,
+  { usuarioId, melhorJogadorAtiva, melhorAssistenteAtiva, bagreAtiva, prazoHoras }
+) {
+  const { data } = await api.put(`/grupos/${id}/configuracao-avaliacao`, {
+    usuarioId,
+    melhorJogadorAtiva,
+    melhorAssistenteAtiva,
+    bagreAtiva,
+    revelacaoAtiva: false,
+    prazoHoras,
+  });
+  return data;
+}
+

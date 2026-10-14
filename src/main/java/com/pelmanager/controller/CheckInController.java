@@ -25,6 +25,13 @@ public class CheckInController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PostMapping("/rodada/{rodadaId}/confirmar-todos")
+    public ResponseEntity<List<ParticipanteCheckInResponseDTO>> confirmarTodos(
+            @PathVariable Long rodadaId,
+            @RequestParam Long usuarioId) {
+        return ResponseEntity.ok(checkInService.confirmarTodos(rodadaId, usuarioId));
+    }
+
     @GetMapping("/rodada/{rodadaId}")
     public ResponseEntity<List<ParticipanteCheckInResponseDTO>> listarCheckInsDaRodada(@PathVariable Long rodadaId) {
         List<ParticipanteCheckInResponseDTO> lista = checkInService.listarStatusDaRodada(rodadaId);
