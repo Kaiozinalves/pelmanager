@@ -1,9 +1,10 @@
 import { api } from "./client";
 
-// Bate com GrupoPeladaRequestDTO: nome, fundadorId, endereco.
-// Retorna GrupoPeladaResponseDTO: id, nome, codigoConvite, dataCriacao, endereco.
-export async function criarGrupo({ nome, fundadorId, endereco }) {
-  const { data } = await api.post("/grupos", { nome, fundadorId, endereco });
+// Bate com GrupoPeladaRequestDTO: nome, fundadorId, endereco, publica.
+// Retorna GrupoPeladaResponseDTO: id, nome, codigoConvite, dataCriacao, endereco, publica.
+// publica (NOVO): true = aparece na busca de peladas próximas; false = privada.
+export async function criarGrupo({ nome, fundadorId, endereco, publica = true }) {
+  const { data } = await api.post("/grupos", { nome, fundadorId, endereco, publica });
   return data;
 }
 
@@ -33,8 +34,8 @@ export async function buscarDetalhesGrupo(id) {
 
 // PUT /api/grupos/{id}/configuracao-avaliacao — somente admin do grupo.
 export async function atualizarConfiguracaoAvaliacao(
-  id,
-  { usuarioId, melhorJogadorAtiva, melhorAssistenteAtiva, bagreAtiva, prazoHoras }
+    id,
+    { usuarioId, melhorJogadorAtiva, melhorAssistenteAtiva, bagreAtiva, prazoHoras }
 ) {
   const { data } = await api.put(`/grupos/${id}/configuracao-avaliacao`, {
     usuarioId,

@@ -68,6 +68,7 @@ public class GrupoPeladaService {
         grupo.setCodigoConvite(UUID.randomUUID().toString().substring(0, 6).toUpperCase());
         grupo.setDataCriacao(LocalDateTime.now());
         grupo.setEndereco(endereco);
+        grupo.setPublica(dto.publica() == null || dto.publica());
 
         GrupoPelada grupoSalvo = grupoRepository.save(grupo);
 
@@ -93,7 +94,8 @@ public class GrupoPeladaService {
                         grupoSalvo.getEndereco().getCidade(),
                         grupoSalvo.getEndereco().getEstado(),
                         grupoSalvo.getEndereco().getCep()
-                )
+                ),
+                grupoSalvo.ehPublica()
         );
     }
 
@@ -125,7 +127,7 @@ public class GrupoPeladaService {
 
         return grupos.stream()
                 .map(grupo -> {
-                    //Prepara o DTO de endereço (com verificação para evitar erro se o grupo não tiver quadra)
+                    //Prepara o DTO de endereço
                     EnderecoResponseDTO enderecoDTO = null;
                     if (grupo.getEndereco() != null) {
                         enderecoDTO = new EnderecoResponseDTO(
@@ -145,7 +147,8 @@ public class GrupoPeladaService {
                             grupo.getNome(),
                             grupo.getCodigoConvite(),
                             grupo.getDataCriacao(),
-                            enderecoDTO
+                            enderecoDTO,
+                            grupo.ehPublica() // NOVO
                     );
                 })
                 .toList();

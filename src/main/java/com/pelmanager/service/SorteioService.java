@@ -89,8 +89,7 @@ public class SorteioService {
         return new SorteioResponseDTO(rodadaId, mapearTimes(timesSorteados));
     }
 
-    // UC05: sorteio aleatório, mas garantindo pelo menos 1 goleiro (primário ou
-    // secundário) escalado em cada time antes de distribuir o resto aleatoriamente.
+
     @Transactional
     public SorteioResponseDTO sortearTimesAleatorio(Long rodadaId) {
         Rodada rodada = rodadaRepository.findById(rodadaId)
@@ -100,21 +99,19 @@ public class SorteioService {
         int numTimes = calcularNumeroDeTimes(confirmados.size());
         validarQuantidadeMinimaDeGoleiros(confirmados, numTimes);
 
-        // Separa quem pode jogar de goleiro (posição primária ou secundária) do resto
+        // Separa quem pode jogar de goleiro do resto
         List<CheckIn> goleiros = new ArrayList<>(confirmados.stream()
                 .filter(c -> c.getUsuario().getPosicaoPrimaria() == Posicao.GOLEIRO
                         || c.getUsuario().getPosicaoSecundaria() == Posicao.GOLEIRO)
                 .toList());
         Collections.shuffle(goleiros);
 
-        // 1 goleiro titular garantido por time (a validação acima já garante que existem
-        // goleiros suficientes: validarQuantidadeMinimaDeGoleiros exige pelo menos numTimes)
+
         List<CheckIn> goleirosTitulares = goleiros.subList(0, numTimes);
         Set<Long> idsGoleirosTitulares = goleirosTitulares.stream()
                 .map(CheckIn::getId)
                 .collect(Collectors.toSet());
 
-        // Todo o resto (jogadores de linha + goleiros excedentes) entra no sorteio aleatório
         List<CheckIn> restante = new ArrayList<>(confirmados.stream()
                 .filter(c -> !idsGoleirosTitulares.contains(c.getId()))
                 .toList());
@@ -153,11 +150,19 @@ public class SorteioService {
         return new SorteioResponseDTO(rodadaId, mapearTimes(times));
     }
 
-    // Busca os times já sorteados de uma rodada, sem sortear de novo.
-    // Usado quando a página é recarregada e o sorteio já tinha sido feito antes.
     public SorteioResponseDTO buscarTimesDaRodada(Long rodadaId) {
         List<Time> times = timeRepository.findByRodadaId(rodadaId);
         return new SorteioResponseDTO(rodadaId, mapearTimes(times));
+    }
+
+    private void limparSorteioAnterior(Long rodadaId) {
+        List<Time> antigos = timeRepository.findByRodadaId(rodadaId);
+        for (Time antigo : antigos) {
+            if (antigo.getJogadores() != null) {
+                antigo.getJogadores().forEach(checkIn -> checkIn.setTime(null));
+            }
+        }
+        timeRepository.deleteAll(antigos);
     }
 
     private List<TimeResponseDTO> mapearTimes(List<Time> times) {

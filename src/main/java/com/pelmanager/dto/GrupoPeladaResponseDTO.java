@@ -7,6 +7,7 @@ public record GrupoPeladaResponseDTO(Long id,
                                      String nome,
                                      String codigoConvite,
                                      LocalDateTime dataCriacao,
-                                     EnderecoResponseDTO endereco
+                                     EnderecoResponseDTO endereco,
+                                     Boolean publica
                                         ) {
 }

@@ -31,6 +31,8 @@ public class GrupoPelada {
     @JoinColumn(name = "endereco_id")
     private Endereco endereco;
 
+    private Boolean publica = true;
+
     // Configuração da votação de fim de rodada. O "bagre" nasce desligado: o rótulo
     // pode ser engraçado entre amigos, mas constrangedor em outros contextos.
     @Column(name = "categoria_melhor_ativa", nullable = false, columnDefinition = "boolean default true")
@@ -55,5 +57,9 @@ public class GrupoPelada {
         if (categoriaAssistenteAtiva) ativas.add(CategoriaVoto.MELHOR_ASSISTENTE);
         if (categoriaBagreAtiva) ativas.add(CategoriaVoto.BAGRE);
         return ativas;
+    }
+
+    public boolean ehPublica() {
+        return !Boolean.FALSE.equals(this.publica);
     }
 }

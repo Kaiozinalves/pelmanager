@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Input } from "../components/Input";
+import { Input, Select } from "../components/Input";
 import { Button } from "../components/Button";
 import { criarGrupo, entrarNoGrupo, listarMeusGrupos } from "../api/grupo";
 import { extrairMensagemErro } from "../constants/enums";
@@ -23,6 +23,7 @@ export function Home() {
   const [listaVemDoServidor, setListaVemDoServidor] = useState(false);
 
   const [nomeGrupo, setNomeGrupo] = useState("");
+  const [visibilidade, setVisibilidade] = useState("publica"); // NOVO: "publica" | "privada"
   const [endereco, setEndereco] = useState(ENDERECO_INICIAL);
   const [criando, setCriando] = useState(false);
   const [erroCriar, setErroCriar] = useState(null);
@@ -67,14 +68,16 @@ export function Home() {
         nome: nomeGrupo,
         fundadorId: usuario.id,
         endereco,
+        publica: visibilidade === "publica", // NOVO
       });
       setGrupoRecemCriado(grupoCriado);
       setNomeGrupo("");
+      setVisibilidade("publica"); // NOVO
       setEndereco(ENDERECO_INICIAL);
       await carregarGrupos();
     } catch (err) {
       setErroCriar(
-        extrairMensagemErro(err, "Não foi possível criar a pelada agora. Tenta de novo em instantes.")
+          extrairMensagemErro(err, "Não foi possível criar a pelada agora. Tenta de novo em instantes.")
       );
     } finally {
       setCriando(false);
@@ -93,7 +96,7 @@ export function Home() {
       await carregarGrupos();
     } catch (err) {
       setErroEntrar(
-        extrairMensagemErro(err, "Código inválido ou você já participa dessa pelada.")
+          extrairMensagemErro(err, "Código inválido ou você já participa dessa pelada.")
       );
     } finally {
       setEntrando(false);
@@ -101,175 +104,187 @@ export function Home() {
   }
 
   return (
-    <div className="home">
-      <header className="home-header">
-        <span className="marca marca--escura">Pelada</span>
-        <div className="home-header-usuario">
-          <span>Olá, {usuario?.nome?.split(" ")[0] || usuario?.apelido}</span>
-          <Link className="link-simples" to="/perfil">
-            Editar perfil
-          </Link>
-          <button className="link-simples" onClick={sair}>
-            Sair
-          </button>
-        </div>
-      </header>
+      <div className="home">
+        <header className="home-header">
+          <span className="marca marca--escura">Pelada</span>
+          <div className="home-header-usuario">
+            <span>Olá, {usuario?.nome?.split(" ")[0] || usuario?.apelido}</span>
+            <Link className="link-simples" to="/perfil">
+              Editar perfil
+            </Link>
+            <button className="link-simples" onClick={sair}>
+              Sair
+            </button>
+          </div>
+        </header>
 
-      <main className="home-conteudo">
-        <section className="painel painel--lista">
-          <h2 className="painel-titulo">Suas peladas</h2>
+        <main className="home-conteudo">
+          <section className="painel painel--lista">
+            <h2 className="painel-titulo">Suas peladas</h2>
 
-          {carregandoGrupos && <p className="texto-suave">Carregando…</p>}
+            {carregandoGrupos && <p className="texto-suave">Carregando…</p>}
 
-          {!carregandoGrupos && grupos.length === 0 && (
-            <div className="estado-vazio">
-              <p>Você ainda não faz parte de nenhuma pelada.</p>
-              <p className="texto-suave">
-                Crie a primeira ou entre com um código de convite, ali ao lado.
-              </p>
-            </div>
-          )}
+            {!carregandoGrupos && grupos.length === 0 && (
+                <div className="estado-vazio">
+                  <p>Você ainda não faz parte de nenhuma pelada.</p>
+                  <p className="texto-suave">
+                    Crie a primeira ou entre com um código de convite, ali ao lado.
+                  </p>
+                </div>
+            )}
 
-          {!carregandoGrupos && grupos.length > 0 && (
-            <ul className="lista-grupos">
-              {grupos.map((grupo) => (
-                <li key={grupo.id}>
-                  <Link to={`/grupos/${grupo.id}`} className="item-grupo">
-                    <span className="item-grupo-nome">{grupo.nome}</span>
-                    <span className="item-grupo-local">
+            {!carregandoGrupos && grupos.length > 0 && (
+                <ul className="lista-grupos">
+                  {grupos.map((grupo) => (
+                      <li key={grupo.id}>
+                        <Link to={`/grupos/${grupo.id}`} className="item-grupo">
+                          <span className="item-grupo-nome">{grupo.nome}</span>
+                          <span className="item-grupo-local">
                       {grupo.endereco?.cidade
-                        ? `${grupo.endereco.cidade} · ${grupo.codigoConvite}`
-                        : grupo.codigoConvite}
+                          ? `${grupo.endereco.cidade} · ${grupo.codigoConvite}`
+                          : grupo.codigoConvite}
+                            {grupo.publica === false && " · Privada" /* NOVO */}
                     </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
+                        </Link>
+                      </li>
+                  ))}
+                </ul>
+            )}
 
-          {!carregandoGrupos && !listaVemDoServidor && (
-            <p className="texto-suave texto-suave--nota">
-              Não consegui carregar suas peladas do servidor agora — confira
-              se o endpoint GET /api/grupos/meus já foi implementado e se o
-              backend está rodando.
-            </p>
-          )}
-        </section>
-
-        <div className="painel-coluna">
-          <section className="painel">
-            <h2 className="painel-titulo">Criar nova pelada</h2>
-
-            <form className="formulario" onSubmit={aoCriarGrupo} noValidate>
-              <Input
-                id="nomeGrupo"
-                label="Nome do grupo"
-                placeholder="Ex.: Pelada do Sábado"
-                required
-                value={nomeGrupo}
-                onChange={(e) => setNomeGrupo(e.target.value)}
-              />
-
-              <div className="formulario-linha">
-                <Input
-                  id="logradouro"
-                  label="Rua / Av."
-                  required
-                  value={endereco.logradouro}
-                  onChange={(e) => atualizarEndereco("logradouro", e.target.value)}
-                />
-                <Input
-                  id="numero"
-                  label="Número"
-                  value={endereco.numero}
-                  onChange={(e) => atualizarEndereco("numero", e.target.value)}
-                />
-              </div>
-
-              <div className="formulario-linha">
-                <Input
-                  id="bairro"
-                  label="Bairro"
-                  value={endereco.bairro}
-                  onChange={(e) => atualizarEndereco("bairro", e.target.value)}
-                />
-                <Input
-                  id="cidade"
-                  label="Cidade"
-                  required
-                  value={endereco.cidade}
-                  onChange={(e) => atualizarEndereco("cidade", e.target.value)}
-                />
-              </div>
-
-              <div className="formulario-linha">
-                <Input
-                  id="estado"
-                  label="UF"
-                  maxLength={2}
-                  value={endereco.estado}
-                  onChange={(e) =>
-                    atualizarEndereco("estado", e.target.value.toUpperCase())
-                  }
-                />
-                <Input
-                  id="cep"
-                  label="CEP"
-                  value={endereco.cep}
-                  onChange={(e) => atualizarEndereco("cep", e.target.value)}
-                />
-              </div>
-
-              {erroCriar && (
-                <p className="mensagem-erro" role="alert">
-                  {erroCriar}
+            {!carregandoGrupos && !listaVemDoServidor && (
+                <p className="texto-suave texto-suave--nota">
+                  Não consegui carregar suas peladas do servidor agora — confira
+                  se o endpoint GET /api/grupos/meus já foi implementado e se o
+                  backend está rodando.
                 </p>
-              )}
-              {grupoRecemCriado && (
-                <p className="mensagem-sucesso" role="status">
-                  Pelada criada! Código de convite:{" "}
-                  <strong>{grupoRecemCriado.codigoConvite}</strong> —
-                  compartilha com o pessoal.
-                </p>
-              )}
-
-              <Button type="submit" carregando={criando}>
-                Criar pelada
-              </Button>
-            </form>
+            )}
           </section>
 
-          <section className="painel">
-            <h2 className="painel-titulo">Entrar com código de convite</h2>
+          <div className="painel-coluna">
+            <section className="painel">
+              <h2 className="painel-titulo">Criar nova pelada</h2>
 
-            <form className="formulario" onSubmit={aoEntrarNoGrupo} noValidate>
-              <Input
-                id="codigoConvite"
-                label="Código de convite"
-                placeholder="Ex.: 8F3A1C"
-                required
-                value={codigoConvite}
-                onChange={(e) => setCodigoConvite(e.target.value.toUpperCase())}
-              />
+              <form className="formulario" onSubmit={aoCriarGrupo} noValidate>
+                <Input
+                    id="nomeGrupo"
+                    label="Nome do grupo"
+                    placeholder="Ex.: Pelada do Sábado"
+                    required
+                    value={nomeGrupo}
+                    onChange={(e) => setNomeGrupo(e.target.value)}
+                />
 
-              {erroEntrar && (
-                <p className="mensagem-erro" role="alert">
-                  {erroEntrar}
-                </p>
-              )}
-              {entrouComSucesso && (
-                <p className="mensagem-sucesso" role="status">
-                  Você entrou na pelada!
-                </p>
-              )}
+                {/* NOVO: visibilidade da pelada, definida no cadastro */}
+                <Select
+                    id="visibilidade"
+                    label="Visibilidade"
+                    value={visibilidade}
+                    onChange={(e) => setVisibilidade(e.target.value)}
+                >
+                  <option value="publica">Pública — aparece na busca de peladas próximas</option>
+                  <option value="privada">Privada — só entra quem tiver o código</option>
+                </Select>
 
-              <Button type="submit" variante="secundario" carregando={entrando}>
-                Entrar na pelada
-              </Button>
-            </form>
-          </section>
-        </div>
-      </main>
-    </div>
+                <div className="formulario-linha">
+                  <Input
+                      id="logradouro"
+                      label="Rua / Av."
+                      required
+                      value={endereco.logradouro}
+                      onChange={(e) => atualizarEndereco("logradouro", e.target.value)}
+                  />
+                  <Input
+                      id="numero"
+                      label="Número"
+                      value={endereco.numero}
+                      onChange={(e) => atualizarEndereco("numero", e.target.value)}
+                  />
+                </div>
+
+                <div className="formulario-linha">
+                  <Input
+                      id="bairro"
+                      label="Bairro"
+                      value={endereco.bairro}
+                      onChange={(e) => atualizarEndereco("bairro", e.target.value)}
+                  />
+                  <Input
+                      id="cidade"
+                      label="Cidade"
+                      required
+                      value={endereco.cidade}
+                      onChange={(e) => atualizarEndereco("cidade", e.target.value)}
+                  />
+                </div>
+
+                <div className="formulario-linha">
+                  <Input
+                      id="estado"
+                      label="UF"
+                      maxLength={2}
+                      value={endereco.estado}
+                      onChange={(e) =>
+                          atualizarEndereco("estado", e.target.value.toUpperCase())
+                      }
+                  />
+                  <Input
+                      id="cep"
+                      label="CEP"
+                      value={endereco.cep}
+                      onChange={(e) => atualizarEndereco("cep", e.target.value)}
+                  />
+                </div>
+
+                {erroCriar && (
+                    <p className="mensagem-erro" role="alert">
+                      {erroCriar}
+                    </p>
+                )}
+                {grupoRecemCriado && (
+                    <p className="mensagem-sucesso" role="status">
+                      Pelada criada! Código de convite:{" "}
+                      <strong>{grupoRecemCriado.codigoConvite}</strong> —
+                      compartilha com o pessoal.
+                    </p>
+                )}
+
+                <Button type="submit" carregando={criando}>
+                  Criar pelada
+                </Button>
+              </form>
+            </section>
+
+            <section className="painel">
+              <h2 className="painel-titulo">Entrar com código de convite</h2>
+
+              <form className="formulario" onSubmit={aoEntrarNoGrupo} noValidate>
+                <Input
+                    id="codigoConvite"
+                    label="Código de convite"
+                    placeholder="Ex.: 8F3A1C"
+                    required
+                    value={codigoConvite}
+                    onChange={(e) => setCodigoConvite(e.target.value.toUpperCase())}
+                />
+
+                {erroEntrar && (
+                    <p className="mensagem-erro" role="alert">
+                      {erroEntrar}
+                    </p>
+                )}
+                {entrouComSucesso && (
+                    <p className="mensagem-sucesso" role="status">
+                      Você entrou na pelada!
+                    </p>
+                )}
+
+                <Button type="submit" variante="secundario" carregando={entrando}>
+                  Entrar na pelada
+                </Button>
+              </form>
+            </section>
+          </div>
+        </main>
+      </div>
   );
 }
