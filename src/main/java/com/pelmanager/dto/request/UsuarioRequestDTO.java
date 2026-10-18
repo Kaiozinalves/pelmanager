@@ -11,5 +11,6 @@ public record UsuarioRequestDTO(
         String senha,
         PernaDominante peDominante,
         Posicao posicaoPrimaria,
-        Posicao posicaoSecundaria
+        Posicao posicaoSecundaria,
+        EnderecoRequestDTO endereco
 ) {}

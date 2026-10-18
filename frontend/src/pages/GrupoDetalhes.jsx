@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
 import { TabelasEstatisticas } from "../components/TabelasEstatisticas";
+import { BuscaFreeAgentsGrupo } from "../components/BuscaFreeAgentsGrupo";
 import { useAuth } from "../context/AuthContext";
 import { atualizarConfiguracaoAvaliacao, buscarDetalhesGrupo } from "../api/grupo";
 import { estatisticasDoGrupo } from "../api/gol";
@@ -197,6 +198,8 @@ export function GrupoDetalhes() {
                 </ul>
               )}
             </section>
+
+            <BuscaFreeAgentsGrupo grupo={grupo} />
 
             <section className="painel painel--form">
               <h2 className="painel-titulo">Estatísticas da pelada</h2>

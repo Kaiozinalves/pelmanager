@@ -48,26 +48,33 @@ public class FreeAgentService {
 
     @Transactional
     public FreeAgentResponseDTO ativar(FreeAgentRequestDTO dto) {
-        if (dto.cidade() == null || dto.cidade().isBlank()) {
-            throw new RequisicaoInvalidaException("Informe a cidade onde você quer jogar.");
-        }
-        if (dto.estado() != null && !dto.estado().isBlank() && dto.estado().trim().length() != 2) {
-            throw new RequisicaoInvalidaException("O estado deve ter 2 letras (ex.: RN).");
-        }
-
         Usuario usuario = usuarioRepository.findById(dto.usuarioId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado."));
+        Endereco endereco = usuario.getEndereco();
+        if (endereco == null || vazioParaNulo(endereco.getCidade()) == null) {
+            throw new RequisicaoInvalidaException(
+                    "Cadastre a cidade no seu perfil antes de ficar disponível como free agent.");
+        }
 
         FreeAgent freeAgent = freeAgentRepository.findByUsuarioId(usuario.getId())
                 .orElseGet(FreeAgent::new);
 
         freeAgent.setUsuario(usuario);
-        freeAgent.setCidade(dto.cidade().trim());
-        freeAgent.setEstado(vazioParaNulo(dto.estado()) == null ? null : dto.estado().trim().toUpperCase());
-        freeAgent.setBairro(vazioParaNulo(dto.bairro()));
+        aplicarEndereco(freeAgent, endereco);
         freeAgent.setDataAtivacao(LocalDateTime.now());
 
         return paraDTO(freeAgentRepository.save(freeAgent));
+    }
+
+    @Transactional
+    public void sincronizarEndereco(Usuario usuario) {
+        if (usuario.getEndereco() == null) {
+            return;
+        }
+        freeAgentRepository.findByUsuarioId(usuario.getId()).ifPresent(freeAgent -> {
+            aplicarEndereco(freeAgent, usuario.getEndereco());
+            freeAgentRepository.save(freeAgent);
+        });
     }
 
     @Transactional
@@ -149,5 +156,12 @@ public class FreeAgentService {
 
     private String vazioParaNulo(String valor) {
         return (valor == null || valor.isBlank()) ? null : valor.trim();
+    }
+
+    private void aplicarEndereco(FreeAgent freeAgent, Endereco endereco) {
+        freeAgent.setCidade(endereco.getCidade().trim());
+        String estado = vazioParaNulo(endereco.getEstado());
+        freeAgent.setEstado(estado == null ? null : estado.toUpperCase());
+        freeAgent.setBairro(vazioParaNulo(endereco.getBairro()));
     }
 }

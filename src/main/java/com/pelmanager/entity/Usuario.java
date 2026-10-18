@@ -26,6 +26,10 @@ public class Usuario {
     @Column(nullable = false)
     private String senha;
 
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "endereco_id", unique = true)
+    private Endereco endereco;
+
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
     private List<Participante> gruposQueParticipa;
 

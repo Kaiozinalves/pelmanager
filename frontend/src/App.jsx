@@ -8,6 +8,8 @@ import { Perfil } from "./pages/Perfil";
 import { GrupoDetalhes } from "./pages/GrupoDetalhes";
 import { Rodada } from "./pages/Rodada";
 import { WrappedRodada } from "./pages/WrappedRodada";
+import { PeladasProximas } from "./pages/PeladasProximas"; // NOVO
+import { FreeAgents } from "./pages/FreeAgents"; // NOVO
 
 function App() {
   return (
@@ -53,6 +55,23 @@ function App() {
             element={
               <ProtectedRoute>
                 <WrappedRodada />
+              </ProtectedRoute>
+            }
+          />
+          {/* NOVO: buscar pelada próxima (UC08) e free agent (UC07) */}
+          <Route
+            path="/peladas-proximas"
+            element={
+              <ProtectedRoute>
+                <PeladasProximas />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/free-agents"
+            element={
+              <ProtectedRoute>
+                <FreeAgents />
               </ProtectedRoute>
             }
           />

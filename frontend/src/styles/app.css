@@ -1048,3 +1048,119 @@
   .wrapped-nav-jogadores > button { min-width: 0; padding-inline: 12px; }
   .wrapped-nota { width: 42px; height: 42px; }
 }
+
+/* ---------- Buscar peladas (UC08) e Free agents (UC07) ---------- */
+/* o cabeçalho da Home agora tem mais links: deixa quebrar linha em tela estreita */
+.home-header-usuario {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.botao--pequeno {
+  padding: 8px var(--espaco-4);
+  font-size: 14px;
+  line-height: 1.4;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.formulario-linha--uf {
+  grid-template-columns: 1fr 90px;
+}
+
+.lista-resultados {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+}
+
+.cartao-pelada,
+.cartao-agente {
+  border: 1.5px solid var(--cor-linha);
+  border-radius: var(--raio-medio);
+  padding: var(--espaco-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.cartao-pelada p,
+.cartao-agente p {
+  margin: 0;
+}
+
+.cartao-pelada-topo,
+.cartao-agente-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--espaco-3);
+}
+
+.cartao-pelada-nome {
+  font-size: 22px;
+  color: var(--cor-grama-escura);
+}
+
+.cartao-pelada-quando {
+  font-weight: 600;
+}
+
+.cartao-pelada-codigo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espaco-3);
+  margin-top: var(--espaco-2);
+  padding-top: var(--espaco-3);
+  border-top: 1px dashed var(--cor-linha);
+}
+
+.codigo-convite {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 16px;
+  letter-spacing: 1px;
+  background: var(--cor-giz-forte);
+  padding: 2px var(--espaco-2);
+  border-radius: var(--raio-pequeno);
+}
+
+.badge-destaque,
+.badge-nota {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--cor-ouro);
+  color: var(--cor-tinta);
+  white-space: nowrap;
+}
+
+.badge-nota--vazia {
+  background: var(--cor-giz-forte);
+  color: var(--cor-tinta-suave);
+}
+
+.aviso-codigo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espaco-3);
+  padding: var(--espaco-3) var(--espaco-4);
+  margin-bottom: var(--espaco-4);
+  border: 1.5px solid var(--cor-ouro);
+  border-radius: var(--raio-medio);
+  background: #FBF3E2;
+}
+
+.status-free-agent {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  margin: 0 0 var(--espaco-4);
+}

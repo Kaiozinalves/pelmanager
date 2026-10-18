@@ -15,6 +15,14 @@ const FORM_INICIAL = {
   peDominante: "",
   posicaoPrimaria: "",
   posicaoSecundaria: "",
+  endereco: {
+    logradouro: "",
+    numero: "",
+    bairro: "",
+    cidade: "",
+    estado: "",
+    cep: "",
+  },
 };
 
 export function Cadastro() {
@@ -26,6 +34,14 @@ export function Cadastro() {
   function atualizarCampo(campo, valor) {
     limparErro();
     setForm((atual) => ({ ...atual, [campo]: valor }));
+  }
+
+  function atualizarEndereco(campo, valor) {
+    limparErro();
+    setForm((atual) => ({
+      ...atual,
+      endereco: { ...atual.endereco, [campo]: valor },
+    }));
   }
 
   async function aoSubmeter(evento) {
@@ -147,6 +163,57 @@ export function Cadastro() {
             </option>
           ))}
         </Select>
+
+        <h3 className="subtitulo-secao">Endereço</h3>
+        <p className="texto-suave">
+          Sua cidade e seu bairro ajudam os grupos a encontrar você quando estiver disponível para jogar.
+        </p>
+        <div className="formulario-linha">
+          <Input
+            id="logradouro"
+            label="Rua / Av."
+            required
+            value={form.endereco.logradouro}
+            onChange={(e) => atualizarEndereco("logradouro", e.target.value)}
+          />
+          <Input
+            id="numero"
+            label="Número"
+            value={form.endereco.numero}
+            onChange={(e) => atualizarEndereco("numero", e.target.value)}
+          />
+        </div>
+        <div className="formulario-linha">
+          <Input
+            id="bairro"
+            label="Bairro"
+            value={form.endereco.bairro}
+            onChange={(e) => atualizarEndereco("bairro", e.target.value)}
+          />
+          <Input
+            id="cidade"
+            label="Cidade"
+            required
+            value={form.endereco.cidade}
+            onChange={(e) => atualizarEndereco("cidade", e.target.value)}
+          />
+        </div>
+        <div className="formulario-linha">
+          <Input
+            id="estado"
+            label="UF"
+            maxLength={2}
+            value={form.endereco.estado}
+            onChange={(e) => atualizarEndereco("estado", e.target.value.toUpperCase())}
+          />
+          <Input
+            id="cep"
+            label="CEP"
+            maxLength={9}
+            value={form.endereco.cep}
+            onChange={(e) => atualizarEndereco("cep", e.target.value)}
+          />
+        </div>
 
         {erro && (
           <p className="mensagem-erro" role="alert">

@@ -2,7 +2,7 @@ package com.pelmanager.dto;
 
 import com.pelmanager.entity.enums.PernaDominante;
 import com.pelmanager.entity.enums.Posicao;
-import lombok.Data;
+import com.pelmanager.dto.EnderecoResponseDTO;
 
 
 public record UsuarioResponseDTO(
@@ -12,5 +12,6 @@ public record UsuarioResponseDTO(
         String email,
         PernaDominante peDominante,
         Posicao posicaoPrimaria,
-        Posicao posicaoSecundaria
+        Posicao posicaoSecundaria,
+        EnderecoResponseDTO endereco
 ) {}

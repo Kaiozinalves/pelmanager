@@ -8,5 +8,6 @@ public record UsuarioUpdateRequestDTO(
         String apelido,
         PernaDominante peDominante,
         Posicao posicaoPrimaria,
-        Posicao posicaoSecundaria
+        Posicao posicaoSecundaria,
+        EnderecoRequestDTO endereco
 ) {}

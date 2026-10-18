@@ -29,6 +29,14 @@ export function Perfil() {
             peDominante: dados.peDominante || "",
             posicaoPrimaria: dados.posicaoPrimaria || "",
             posicaoSecundaria: dados.posicaoSecundaria || "",
+            endereco: {
+              logradouro: dados.endereco?.logradouro || usuario.endereco?.logradouro || "",
+              numero: dados.endereco?.numero || usuario.endereco?.numero || "",
+              bairro: dados.endereco?.bairro || usuario.endereco?.bairro || "",
+              cidade: dados.endereco?.cidade || usuario.endereco?.cidade || "",
+              estado: dados.endereco?.estado || usuario.endereco?.estado || "",
+              cep: dados.endereco?.cep || usuario.endereco?.cep || "",
+            },
           });
         }
       })
@@ -49,6 +57,15 @@ export function Perfil() {
     setForm((atual) => ({ ...atual, [campo]: valor }));
   }
 
+  function atualizarEndereco(campo, valor) {
+    setErro(null);
+    setSucesso(false);
+    setForm((atual) => ({
+      ...atual,
+      endereco: { ...atual.endereco, [campo]: valor },
+    }));
+  }
+
   async function aoSalvar(evento) {
     evento.preventDefault();
     setErro(null);
@@ -61,8 +78,9 @@ export function Perfil() {
         peDominante: form.peDominante,
         posicaoPrimaria: form.posicaoPrimaria,
         posicaoSecundaria: form.posicaoSecundaria || null,
+        endereco: form.endereco,
       });
-      atualizarUsuarioLogado(usuarioAtualizado);
+      atualizarUsuarioLogado({ ...usuarioAtualizado, endereco: form.endereco });
       setSucesso(true);
     } catch (err) {
       setErro(extrairMensagemErro(err, "Não foi possível salvar as alterações."));
@@ -149,6 +167,57 @@ export function Perfil() {
                   </option>
                 ))}
               </Select>
+
+              <h3 className="subtitulo-secao">Endereço</h3>
+              <p className="texto-suave">
+                O endereço é usado para sugerir jogadores da sua região quando você ativa a disponibilidade de free agent.
+              </p>
+              <div className="formulario-linha">
+                <Input
+                  id="logradouro"
+                  label="Rua / Av."
+                  required
+                  value={form.endereco.logradouro}
+                  onChange={(e) => atualizarEndereco("logradouro", e.target.value)}
+                />
+                <Input
+                  id="numero"
+                  label="Número"
+                  value={form.endereco.numero}
+                  onChange={(e) => atualizarEndereco("numero", e.target.value)}
+                />
+              </div>
+              <div className="formulario-linha">
+                <Input
+                  id="bairro"
+                  label="Bairro"
+                  value={form.endereco.bairro}
+                  onChange={(e) => atualizarEndereco("bairro", e.target.value)}
+                />
+                <Input
+                  id="cidade"
+                  label="Cidade"
+                  required
+                  value={form.endereco.cidade}
+                  onChange={(e) => atualizarEndereco("cidade", e.target.value)}
+                />
+              </div>
+              <div className="formulario-linha">
+                <Input
+                  id="estado"
+                  label="UF"
+                  maxLength={2}
+                  value={form.endereco.estado}
+                  onChange={(e) => atualizarEndereco("estado", e.target.value.toUpperCase())}
+                />
+                <Input
+                  id="cep"
+                  label="CEP"
+                  maxLength={9}
+                  value={form.endereco.cep}
+                  onChange={(e) => atualizarEndereco("cep", e.target.value)}
+                />
+              </div>
 
               {erro && (
                 <p className="mensagem-erro" role="alert">
