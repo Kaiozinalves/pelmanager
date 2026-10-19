@@ -11,11 +11,11 @@ import java.util.Base64;
 
 @Service
 public class GerarQrCodeService {
-    public String gerarQrCode(String chavePixGerente, BigDecimal valor){
-        try{
+    public String gerarQrCode(String chavePixGerente, BigDecimal valor) {
+        try {
             String dadosPix = gerarDadosPix(chavePixGerente, valor);
 
-            //criar qr code
+            // criar qr code
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
             var bitMatrix = qrCodeWriter.encode(
                     dadosPix,
@@ -24,7 +24,7 @@ public class GerarQrCodeService {
                     300
             );
 
-            //converter pra png
+            // converter pra png
             ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
             MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
             byte[] pngData = pngOutputStream.toByteArray();
@@ -38,7 +38,7 @@ public class GerarQrCodeService {
         }
     }
 
-    private String gerarDadosPix(String chavePixGerente, BigDecimal valor) {
+    public String gerarDadosPix(String chavePixGerente, BigDecimal valor) {
         if (chavePixGerente == null || chavePixGerente.isBlank()) {
             throw new IllegalArgumentException("Chave Pix não pode ser vazia");
         }
@@ -46,7 +46,7 @@ public class GerarQrCodeService {
             throw new IllegalArgumentException("Valor não pode ser nulo");
         }
 
-        String chavePix = chavePixGerente.trim();
+        String chavePix = normalizarChavePix(chavePixGerente.trim());
         String valorFormatado = valor.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString();
         String nomeLoja = "Pelmanager";
         String cidade = "Natal";
@@ -65,10 +65,34 @@ public class GerarQrCodeService {
                 + "54" + formatLength(valorFormatado) + valorFormatado
                 + "5802BR"
                 + "59" + formatLength(nomeLoja) + nomeLoja
-                + "60" + formatLength(cidade) + cidade;
+                + "60" + formatLength(cidade) + cidade
+                + "62070503***"
+                + "6304";
 
         String crc = calcularCrc16Ccitt(payload);
-        return payload + "6304" + crc;
+        return payload + crc;
+    }
+
+    private String normalizarChavePix(String chave) {
+        // Se for CPF com pontuação, remove pontos e traço
+        if (chave.matches("\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}")) {
+            return chave.replaceAll("\\D", "");
+        }
+        // Se for CNPJ com pontuação, remove pontuação
+        if (chave.matches("\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}")) {
+            return chave.replaceAll("\\D", "");
+        }
+        // Se for telefone formatado, normaliza para +55DDDNUMERO
+        if (chave.matches("(\\+55\\s?)?(\\(?\\d{2}\\)?\\s?)\\d{4,5}-?\\d{4}")) {
+            String digitos = chave.replaceAll("\\D", "");
+            if (digitos.startsWith("55") && (digitos.length() == 12 || digitos.length() == 13)) {
+                return "+" + digitos;
+            }
+            if (digitos.length() == 10 || digitos.length() == 11) {
+                return "+55" + digitos;
+            }
+        }
+        return chave;
     }
 
     private String formatLength(String value) {

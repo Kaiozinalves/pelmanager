@@ -8,7 +8,6 @@ import com.pelmanager.entity.Endereco;
 import com.pelmanager.entity.GrupoPelada;
 import com.pelmanager.entity.Participante;
 import com.pelmanager.entity.Usuario;
-// TODO: Lembre de importar o seu Enum aqui. Ex: import com.pelmanager.entity.enums.Papel;
 import com.pelmanager.entity.enums.Papel;
 import com.pelmanager.exception.CodigoConviteInvalidoException;
 import com.pelmanager.exception.RecursoNaoEncontradoException;
@@ -53,7 +52,7 @@ public class GrupoPeladaService {
 
         // Impede que a pelada seja criada sem um dono válido
         Usuario dono = usuarioRepository.findById(dto.fundadorId())
-                .orElseThrow(() -> new RuntimeException("Usuário criador não encontrado."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário criador não encontrado."));
 
         Endereco endereco = new Endereco();
         endereco.setLogradouro(dto.endereco().logradouro());
@@ -86,15 +85,7 @@ public class GrupoPeladaService {
                 grupoSalvo.getNome(),
                 grupoSalvo.getCodigoConvite(),
                 grupoSalvo.getDataCriacao(),
-                new EnderecoResponseDTO(
-                        grupoSalvo.getEndereco().getId(),
-                        grupoSalvo.getEndereco().getLogradouro(),
-                        grupoSalvo.getEndereco().getNumero(),
-                        grupoSalvo.getEndereco().getBairro(),
-                        grupoSalvo.getEndereco().getCidade(),
-                        grupoSalvo.getEndereco().getEstado(),
-                        grupoSalvo.getEndereco().getCep()
-                ),
+                paraEnderecoDTO(grupoSalvo.getEndereco()),
                 grupoSalvo.ehPublica()
         );
     }
@@ -103,7 +94,7 @@ public class GrupoPeladaService {
     public void entrarNoGrupo(EntrarGrupoPeladaRequestDTO dto) {
 
         Usuario jogador = usuarioRepository.findById(dto.IdUsuario())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado."));
 
         GrupoPelada grupo = grupoRepository.findByCodigoConvite(dto.codigoConvite())
                 .orElseThrow(CodigoConviteInvalidoException::new);
@@ -126,36 +117,20 @@ public class GrupoPeladaService {
         List<GrupoPelada> grupos = grupoRepository.findByUsuarioId(usuarioId);
 
         return grupos.stream()
-                .map(grupo -> {
-                    //Prepara o DTO de endereço
-                    EnderecoResponseDTO enderecoDTO = null;
-                    if (grupo.getEndereco() != null) {
-                        enderecoDTO = new EnderecoResponseDTO(
-                                grupo.getEndereco().getId(),
-                                grupo.getEndereco().getLogradouro(),
-                                grupo.getEndereco().getNumero(),
-                                grupo.getEndereco().getBairro(),
-                                grupo.getEndereco().getCidade(),
-                                grupo.getEndereco().getEstado(),
-                                grupo.getEndereco().getCep()
-                        );
-                    }
-
-                    //Retorna o DTO do Grupo
-                    return new GrupoPeladaResponseDTO(
-                            grupo.getId(),
-                            grupo.getNome(),
-                            grupo.getCodigoConvite(),
-                            grupo.getDataCriacao(),
-                            enderecoDTO,
-                            grupo.ehPublica() // NOVO
-                    );
-                })
+                .map(grupo -> new GrupoPeladaResponseDTO(
+                        grupo.getId(),
+                        grupo.getNome(),
+                        grupo.getCodigoConvite(),
+                        grupo.getDataCriacao(),
+                        paraEnderecoDTO(grupo.getEndereco()),
+                        grupo.ehPublica()
+                ))
                 .toList();
     }
+
     public GrupoPeladaDetalhesResponseDTO buscarDetalhes(Long id) {
         GrupoPelada grupo = grupoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pelada não encontrada."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pelada não encontrada."));
 
         List<ParticipanteResponseDTO> participantes = grupo.getParticipantes().stream()
                 .map(participante -> new ParticipanteResponseDTO(
@@ -169,14 +144,14 @@ public class GrupoPeladaService {
                 .toList();
 
         List<RodadaResponseDTO> rodadas = rodadaRepository.findByGrupoIdOrderByIdDesc(id).stream()
-                .map(rodada -> new RodadaResponseDTO(
-                        rodada.getId(),
-                        grupo.getId(),
-                        rodada.getDataRodada(),
-                        rodada.getHoraRodada(),
-                        rodada.getStatusRodada().name()
-                ))
+                .map(RodadaService::paraRodadaDTO)
                 .toList();
+
+        ConfiguracaoPagamentoDTO configPagamento = ConfiguracaoPagamentoDTO.builder()
+                .ativo(grupo.isSistemaPagementoAtivo())
+                .valorTotal(grupo.getValorTotalPelada())
+                .chavePixGerente(grupo.getChavePixGerente())
+                .build();
 
         return new GrupoPeladaDetalhesResponseDTO(
                 grupo.getId(),
@@ -185,7 +160,9 @@ public class GrupoPeladaService {
                 grupo.getDataCriacao(),
                 participantes,
                 rodadas,
-                paraConfiguracaoDTO(grupo)
+                paraConfiguracaoDTO(grupo),
+                paraEnderecoDTO(grupo.getEndereco()),
+                configPagamento
         );
     }
 
@@ -214,6 +191,19 @@ public class GrupoPeladaService {
         grupo.setPrazoAvaliacaoHoras(dto.prazoHoras());
 
         return paraConfiguracaoDTO(grupoRepository.save(grupo));
+    }
+
+    private EnderecoResponseDTO paraEnderecoDTO(Endereco endereco) {
+        if (endereco == null) return null;
+        return new EnderecoResponseDTO(
+                endereco.getId(),
+                endereco.getLogradouro(),
+                endereco.getNumero(),
+                endereco.getBairro(),
+                endereco.getCidade(),
+                endereco.getEstado(),
+                endereco.getCep()
+        );
     }
 
     private ConfiguracaoAvaliacaoDTO paraConfiguracaoDTO(GrupoPelada grupo) {

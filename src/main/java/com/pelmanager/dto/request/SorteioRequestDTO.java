@@ -1,4 +1,4 @@
 package com.pelmanager.dto.request;
 
-public record SorteioRequestDTO(Long rodadaId) {
+public record SorteioRequestDTO(Long rodadaId, Long usuarioId) {
 }

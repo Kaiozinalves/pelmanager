@@ -8,7 +8,10 @@ import com.pelmanager.entity.Rodada;
 import com.pelmanager.entity.Usuario;
 import com.pelmanager.entity.enums.StatusCheckIn;
 import com.pelmanager.entity.enums.StatusRodada;
+import com.pelmanager.exception.AcessoNegadoException;
 import com.pelmanager.exception.CheckInDuplicadoException;
+import com.pelmanager.exception.OperacaoInvalidaException;
+import com.pelmanager.exception.RecursoNaoEncontradoException;
 import com.pelmanager.exception.RodadaNaoEncontradaException;
 import com.pelmanager.repository.CheckInRepository;
 import com.pelmanager.repository.ParticipanteRepository;
@@ -28,15 +31,20 @@ public class CheckInService {
     private final UsuarioRepository usuarioRepository;
     private final ParticipanteRepository participanteRepository;
     private final PermissaoService permissaoService;
+    private final PagamentoService pagamentoService;
 
-    public CheckInService(CheckInRepository checkInRepository, RodadaRepository rodadaRepository,
-                          UsuarioRepository usuarioRepository, ParticipanteRepository participanteRepository,
-                          PermissaoService permissaoService) {
+    public CheckInService(CheckInRepository checkInRepository,
+                          RodadaRepository rodadaRepository,
+                          UsuarioRepository usuarioRepository,
+                          ParticipanteRepository participanteRepository,
+                          PermissaoService permissaoService,
+                          PagamentoService pagamentoService) {
         this.checkInRepository = checkInRepository;
         this.rodadaRepository = rodadaRepository;
         this.usuarioRepository = usuarioRepository;
         this.participanteRepository = participanteRepository;
         this.permissaoService = permissaoService;
+        this.pagamentoService = pagamentoService;
     }
 
     @Transactional
@@ -48,18 +56,33 @@ public class CheckInService {
 
         Rodada rodada1 = rodada.get();
         if (!rodada1.estaAberta()) {
-            throw new RuntimeException("Rodada não está aberta para check-in");
+            throw new OperacaoInvalidaException("Rodada não está aberta para check-in.");
         }
 
         Usuario usuario = usuarioRepository.findById(checkInRequestDTO.usuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado."));
 
         if (!participanteRepository.existsByUsuarioIdAndGrupoId(usuario.getId(), rodada1.getGrupo().getId())) {
-            throw new RuntimeException("Apenas membros do grupo podem fazer check-in nesta rodada.");
+            throw new AcessoNegadoException("Apenas membros do grupo podem fazer check-in nesta rodada.");
         }
 
-        if (checkInRepository.existsByRodadaIdAndUsuarioId(rodada1.getId(), usuario.getId())) {
-            throw new CheckInDuplicadoException();
+        Optional<CheckIn> existenteOpt = checkInRepository.findByRodadaIdAndUsuarioId(rodada1.getId(), usuario.getId());
+        if (existenteOpt.isPresent()) {
+            CheckIn existente = existenteOpt.get();
+            if (existente.getStatus() == StatusCheckIn.CONFIRMADO) {
+                throw new CheckInDuplicadoException();
+            }
+            existente.setStatus(StatusCheckIn.CONFIRMADO);
+            existente.setDataHoraCheckin(LocalDateTime.now());
+            CheckIn checkInSalvo = checkInRepository.save(existente);
+            return new CheckInResponseDTO(
+                    checkInSalvo.getId(),
+                    rodada1.getId(),
+                    usuario.getId(),
+                    usuario.getNome(),
+                    checkInSalvo.getDataHoraCheckin(),
+                    checkInSalvo.getStatus()
+            );
         }
 
         CheckIn checkIn = new CheckIn();
@@ -78,6 +101,20 @@ public class CheckInService {
                 checkInSalvo.getDataHoraCheckin(),
                 checkInSalvo.getStatus()
         );
+    }
+
+    @Transactional
+    public List<ParticipanteCheckInResponseDTO> cancelarCheckIn(Long rodadaId, Long usuarioId) {
+        Rodada rodada = rodadaRepository.findById(rodadaId)
+                .orElseThrow(() -> new RodadaNaoEncontradaException(rodadaId));
+
+        checkInRepository.findByRodadaIdAndUsuarioId(rodada.getId(), usuarioId).ifPresent(checkIn -> {
+            checkIn.setStatus(StatusCheckIn.CANCELADO);
+            checkInRepository.save(checkIn);
+        });
+
+        pagamentoService.CalcularPorDesistencia(rodadaId);
+        return listarStatusDaRodada(rodadaId);
     }
 
     public List<ParticipanteCheckInResponseDTO> listarStatusDaRodada(Long rodadaId) {
@@ -109,7 +146,7 @@ public class CheckInService {
         permissaoService.exigirAdmin(usuarioAdminId, rodada.getGrupo());
 
         if (rodada.getStatusRodada() != StatusRodada.AGENDADA) {
-            throw new RuntimeException("Só é possível confirmar todos enquanto a rodada está agendada.");
+            throw new OperacaoInvalidaException("Só é possível confirmar todos enquanto a rodada está agendada.");
         }
 
         LocalDateTime agora = LocalDateTime.now();
@@ -139,4 +176,3 @@ public class CheckInService {
         return listarStatusDaRodada(rodadaId);
     }
 }
-

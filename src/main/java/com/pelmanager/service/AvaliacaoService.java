@@ -6,6 +6,8 @@ import com.pelmanager.entity.Avaliacao;
 import com.pelmanager.entity.Rodada;
 import com.pelmanager.entity.Usuario;
 import com.pelmanager.entity.enums.StatusRodada;
+import com.pelmanager.exception.OperacaoInvalidaException;
+import com.pelmanager.exception.RecursoNaoEncontradoException;
 import com.pelmanager.exception.RodadaNaoEncontradaException;
 import com.pelmanager.exception.RequisicaoInvalidaException;
 import com.pelmanager.repository.AvaliacaoRepository;
@@ -41,14 +43,18 @@ public class AvaliacaoService {
                 .orElseThrow(() -> new RodadaNaoEncontradaException(dto.rodadaId()));
 
         if (rodada.getStatusRodada() != StatusRodada.FINALIZADA) {
-            throw new RuntimeException("As avaliações só são permitidas após o fim da rodada.");
+            throw new OperacaoInvalidaException("As avaliações só são permitidas após o fim da rodada.");
+        }
+
+        if (!VotacaoService.ABERTA.equals(VotacaoService.situacao(rodada))) {
+            throw new OperacaoInvalidaException("O período de avaliação desta rodada já foi encerrado.");
         }
 
         Usuario avaliador = usuarioRepository.findById(dto.avaliadorId())
-                .orElseThrow(() -> new RuntimeException("Avaliador não encontrado."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Avaliador não encontrado."));
 
         Usuario avaliado = usuarioRepository.findById(dto.avaliadoId())
-                .orElseThrow(() -> new RuntimeException("Jogador avaliado não encontrado."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Jogador avaliado não encontrado."));
 
         if (dto.nota() == null || dto.nota() < 1 || dto.nota() > 5) {
             throw new RequisicaoInvalidaException("A nota deve ficar entre 1 e 5.");
@@ -62,7 +68,7 @@ public class AvaliacaoService {
         }
 
         if (avaliacaoRepository.existsByRodadaIdAndAvaliadorIdAndAvaliadoId(rodada.getId(), avaliador.getId(), avaliado.getId())) {
-            throw new RuntimeException("Você já avaliou este jogador nesta rodada.");
+            throw new OperacaoInvalidaException("Você já avaliou este jogador nesta rodada.");
         }
 
         Avaliacao avaliacao = new Avaliacao();

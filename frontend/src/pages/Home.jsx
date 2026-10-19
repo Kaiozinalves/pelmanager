@@ -284,7 +284,7 @@ export function Home() {
               )}
               {entrouComSucesso && (
                 <p className="mensagem-sucesso" role="status">
-               ev   Você entrou na pelada!
+                  Você entrou na pelada!
                 </p>
               )}
 

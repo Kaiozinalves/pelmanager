@@ -18,13 +18,13 @@ public class SorteioController {
 
     @PostMapping
     public ResponseEntity<SorteioResponseDTO> sortearTimes(@RequestBody SorteioRequestDTO request) {
-        SorteioResponseDTO response = sorteioService.sortearTimes(request.rodadaId());
+        SorteioResponseDTO response = sorteioService.sortearTimes(request.rodadaId(), request.usuarioId());
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/aleatorio")
     public ResponseEntity<SorteioResponseDTO> sortearTimesAleatorio(@RequestBody SorteioRequestDTO request) {
-        SorteioResponseDTO response = sorteioService.sortearTimesAleatorio(request.rodadaId());
+        SorteioResponseDTO response = sorteioService.sortearTimesAleatorio(request.rodadaId(), request.usuarioId());
         return ResponseEntity.ok(response);
     }
 

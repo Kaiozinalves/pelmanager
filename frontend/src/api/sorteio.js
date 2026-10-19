@@ -1,14 +1,14 @@
 import { api } from "./client";
 
 // POST /api/sorteios — sorteio balanceado (posição + nota média das avaliações). UC09.
-export async function sortearBalanceado(rodadaId) {
-  const { data } = await api.post("/sorteios", { rodadaId });
+export async function sortearBalanceado(rodadaId, usuarioId) {
+  const { data } = await api.post("/sorteios", { rodadaId, usuarioId });
   return data; // SorteioResponseDTO: { rodadaId, times: [{ id, nome, jogadores }] }
 }
 
 // POST /api/sorteios/aleatorio — sorteio aleatório, com 1 goleiro garantido por time. UC05.
-export async function sortearAleatorio(rodadaId) {
-  const { data } = await api.post("/sorteios/aleatorio", { rodadaId });
+export async function sortearAleatorio(rodadaId, usuarioId) {
+  const { data } = await api.post("/sorteios/aleatorio", { rodadaId, usuarioId });
   return data;
 }
 

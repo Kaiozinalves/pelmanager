@@ -6,9 +6,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record RodadaRequestDTO(Long grupoId,
+                               Long usuarioId,
                                @JsonFormat(pattern = "HH:mm")
                                LocalTime horario,
                                @JsonFormat(pattern = "yyyy-MM-dd")
                                LocalDate data,
-                               Long enderecoAlternativoId) {
+                               Long enderecoAlternativoId,
+                               EnderecoRequestDTO enderecoAlternativo) {
 }

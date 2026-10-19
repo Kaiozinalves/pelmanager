@@ -10,5 +10,7 @@ public record GrupoPeladaDetalhesResponseDTO(
         LocalDateTime dataCriacao,
         List<ParticipanteResponseDTO> participantes,
         List<RodadaResponseDTO> rodadas,
-        ConfiguracaoAvaliacaoDTO configuracaoAvaliacao
+        ConfiguracaoAvaliacaoDTO configuracaoAvaliacao,
+        EnderecoResponseDTO endereco,
+        ConfiguracaoPagamentoDTO configuracaoPagamento
 ) {}

@@ -1,5 +1,6 @@
 package com.pelmanager.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.pelmanager.entity.enums.StatusPagamento;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -18,11 +19,13 @@ public class Pagamento {
     // Qual rodada
     @ManyToOne
     @JoinColumn(name = "rodada_id", nullable = false)
+    @JsonIgnoreProperties({"grupo", "avaliacoes", "enderecoAlternativo", "categoriasVotacao"})
     private Rodada rodada;
 
     // Qual usuário deve pagar
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
+    @JsonIgnoreProperties({"senha", "gruposQueParticipa", "avaliacoesFeitas", "avaliacoesRecebidas", "endereco"})
     private Usuario usuario;
 
     private BigDecimal valor;
@@ -32,13 +35,11 @@ public class Pagamento {
     private LocalDateTime criadoEm;
     private LocalDateTime pagoEm;
 
-
-
     public boolean foiPago() {
         return status == StatusPagamento.PAGO;
     }
 
-    //quando o gerente confirmar que recebeu o pagamento
+    // quando o gerente confirmar que recebeu o pagamento
     public void marcarComoPago() {
         this.status = StatusPagamento.PAGO;
         this.pagoEm = LocalDateTime.now();

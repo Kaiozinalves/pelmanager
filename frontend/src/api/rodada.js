@@ -1,24 +1,39 @@
 import { api } from "./client";
 
-// Início/fim manuais da partida e encerramento antecipado da votação.
-// Todos exigem o id do usuário logado: o backend valida que ele é ADMIN do grupo.
-// Retornam RodadaStatusResponseDTO (id, status, iniciadaEm, finalizadaEm, votacaoAte).
+// Início/fim manuais da partida, endereço alternativo e encerramento antecipado da votação.
 
 // Bate com RodadaRequestDTO: grupoId, data (yyyy-MM-dd), horario (HH:mm),
-// enderecoAlternativoId (opcional — omitimos, já que ainda não existe um
-// endpoint pra criar/listar endereços alternativos escolhíveis no front).
-// Retorna RodadaResponseDTO (id, grupoId, data, horario, status).
-export async function agendarRodada({ grupoId, data, horario }) {
+// enderecoAlternativoId (opcional), enderecoAlternativo (opcional).
+// Retorna RodadaResponseDTO (id, grupoId, data, horario, status, endereco, usaEnderecoAlternativo, valorPorParticipante).
+export async function agendarRodada({ grupoId, usuarioId, data, horario, enderecoAlternativo = null }) {
   const { data: rodadaCriada } = await api.post("/rodadas", {
     grupoId,
+    usuarioId,
     data,
     horario,
     enderecoAlternativoId: null,
+    enderecoAlternativo,
   });
   return rodadaCriada;
 }
 
-// PATCH /api/rodadas/{id}/iniciar — AGENDADA -> EM_ANDAMENTO (fecha o check-in).
+// PUT /api/rodadas/{id}/endereco — cadastra/atualiza o endereço alternativo da rodada (somente admin).
+export async function atualizarEnderecoDaRodada(id, endereco, usuarioId) {
+  const { data } = await api.put(`/rodadas/${id}/endereco`, endereco, {
+    params: { usuarioId },
+  });
+  return data;
+}
+
+// DELETE /api/rodadas/{id}/endereco — volta a rodada para o endereço padrão da pelada (somente admin).
+export async function removerEnderecoAlternativoDaRodada(id, usuarioId) {
+  const { data } = await api.delete(`/rodadas/${id}/endereco`, {
+    params: { usuarioId },
+  });
+  return data;
+}
+
+// PATCH /api/rodadas/{id}/iniciar — AGENDADA -> EM_ANDAMENTO (fecha o check-in e gera pagamentos).
 export async function iniciarRodada(id, usuarioId) {
   const { data } = await api.patch(`/rodadas/${id}/iniciar`, null, { params: { usuarioId } });
   return data;

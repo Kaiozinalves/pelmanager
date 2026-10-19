@@ -27,14 +27,26 @@ public class PagamentoController {
     @GetMapping("/{id}/qr-code")
     public ResponseEntity<Map<String, String>> obterQRCode(@PathVariable Long id) {
         try {
+            Pagamento p = pagamentoService.obterPagamento(id);
             String qrCode = pagamentoService.gerarQrCode(id);
+            String copiaECola = pagamentoService.gerarCopiaECola(id);
+            String chavePix = (p.getRodada() != null
+                    && p.getRodada().getGrupo() != null
+                    && p.getRodada().getGrupo().getChavePixGerente() != null)
+                    ? p.getRodada().getGrupo().getChavePixGerente()
+                    : "";
+            String valor = p.getValor() != null ? p.getValor().toPlainString() : "0.00";
             return ResponseEntity.ok(Map.of(
                     "qrCode", qrCode,
+                    "copiaECola", copiaECola,
+                    "chavePix", chavePix,
+                    "valor", valor,
                     "mensagem", "Escaneie para pagar via PIX"
             ));
         } catch (Exception e) {
+            String msg = e.getMessage() != null ? e.getMessage() : "Erro ao gerar QR Code";
             return ResponseEntity.badRequest().body(
-                    Map.of("erro", e.getMessage())
+                    Map.of("erro", msg, "mensagem", msg)
             );
         }
     }
@@ -49,9 +61,23 @@ public class PagamentoController {
         return ResponseEntity.ok(pagamentoService.obterPendentes(rodadaId));
     }
 
+    @PostMapping("/rodada/{rodadaId}/gerar")
+    public ResponseEntity<List<Pagamento>> gerarPagamentosRodada(@PathVariable Long rodadaId,
+                                                                 @RequestParam("usuarioId") Long usuarioId) {
+        return ResponseEntity.ok(pagamentoService.gerarPagamentosComoAdmin(rodadaId, usuarioId));
+    }
+
+    @PostMapping("/rodada/{rodadaId}/desistencia/{usuarioId}")
+    public ResponseEntity<List<Pagamento>> registrarDesistencia(@PathVariable Long rodadaId,
+                                                                @PathVariable Long usuarioId,
+                                                                @RequestParam("adminId") Long adminId) {
+        return ResponseEntity.ok(pagamentoService.registrarDesistencia(rodadaId, usuarioId, adminId));
+    }
+
     @PostMapping("/{id}/marcar-pago")
-    public ResponseEntity<Map<String, String>> marcarPago(@PathVariable Long id) {
-        pagamentoService.marcarPago(id);
+    public ResponseEntity<Map<String, String>> marcarPago(@PathVariable Long id,
+                                                          @RequestParam("usuarioId") Long usuarioId) {
+        pagamentoService.marcarPago(id, usuarioId);
         return ResponseEntity.ok(Map.of(
                 "mensagem", "Pagamento marcado como recebido"
         ));

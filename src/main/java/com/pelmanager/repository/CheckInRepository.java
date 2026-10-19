@@ -4,6 +4,7 @@ import com.pelmanager.entity.CheckIn;
 import com.pelmanager.entity.enums.StatusCheckIn;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,5 +20,5 @@ public interface CheckInRepository extends JpaRepository<CheckIn, Long> {
     List<CheckIn> findByRodadaIdAndStatus(Long rodadaId, StatusCheckIn status);
 
     @Query("SELECT COUNT(c) FROM CheckIn c WHERE c.rodada.id = :rodadaId AND c.status = :statusCheckIn")
-    long contarPorRodadaEStatus(Long rodadaId, StatusCheckIn statusCheckIn);
+    long contarPorRodadaEStatus(@Param("rodadaId") Long rodadaId, @Param("statusCheckIn") StatusCheckIn statusCheckIn);
 }

@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Button } from "../components/Button";
 import { buscarDetalhesGrupo } from "../api/grupo";
+import { encerrarVotacao } from "../api/rodada";
 import { listarCheckinsDaRodada } from "../api/checkin";
 import { estatisticasDaRodada, rankingTemporada } from "../api/gol";
 import { listarAvaliacoesDaRodada, avaliarJogador } from "../api/avaliacao";
@@ -130,6 +131,7 @@ export function WrappedRodada() {
   const [salvandoNota, setSalvandoNota] = useState(false);
   const [escolhas, setEscolhas] = useState({});
   const [salvandoVotos, setSalvandoVotos] = useState(false);
+  const [encerrandoVotacao, setEncerrandoVotacao] = useState(false);
 
   const carregar = useCallback(async () => {
     setErro(null);
@@ -160,6 +162,8 @@ export function WrappedRodada() {
   }, [carregar]);
 
   const rodada = grupo?.rodadas?.find((item) => item.id === rodadaIdNum);
+  const ehAdmin =
+    grupo?.participantes?.find((p) => p.usuarioId === usuario.id)?.papel === "ADMIN";
   const confirmados = useMemo(
     () => checkins.filter((checkin) => checkin.statusCheckIn === "CONFIRMADO"),
     [checkins]
@@ -188,7 +192,7 @@ export function WrappedRodada() {
   }, [votacao]);
   const pendentes = categorias.filter((categoria) => !categoria.jaVotei);
   const votacaoAberta = votacao?.situacao === "ABERTA";
-  const rodadaAvaliada = !podeVotar || jogadoresParaAvaliar.length === 0 || avaliados === jogadoresParaAvaliar.length;
+  const rodadaAvaliada = !podeVotar || !votacaoAberta || jogadoresParaAvaliar.length === 0 || avaliados === jogadoresParaAvaliar.length;
   const votosRegistrados = !podeVotar || !votacaoAberta || pendentes.every((categoria) => escolhas[categoria.categoria]);
 
   useEffect(() => {
@@ -238,6 +242,20 @@ export function WrappedRodada() {
       await carregar();
     } finally {
       setSalvandoVotos(false);
+    }
+  }
+
+  async function aoEncerrarVotacao() {
+    setErro(null);
+    setEncerrandoVotacao(true);
+    try {
+      await encerrarVotacao(rodadaIdNum, usuario.id);
+      await carregar();
+      setStory(2);
+    } catch (err) {
+      setErro(extrairMensagemErro(err, "Não foi possível finalizar a votação."));
+    } finally {
+      setEncerrandoVotacao(false);
     }
   }
 
@@ -314,6 +332,8 @@ export function WrappedRodada() {
 
             {!podeVotar ? (
               <div className="wrapped-aviso">Só quem confirmou presença nesta rodada pode avaliar os jogadores.</div>
+            ) : !votacaoAberta ? (
+              <div className="wrapped-aviso">O período de avaliação desta rodada foi encerrado. Avance para ver os resultados.</div>
             ) : jogadoresParaAvaliar.length === 0 ? (
               <div className="wrapped-aviso">Não há outros jogadores para avaliar nesta rodada.</div>
             ) : (
@@ -405,6 +425,11 @@ export function WrappedRodada() {
                 )}
               </>
             )}
+            {ehAdmin && votacaoAberta && (
+              <Button variante="secundario" carregando={encerrandoVotacao} onClick={aoEncerrarVotacao}>
+                Finalizar votação
+              </Button>
+            )}
           </section>
         )}
 
@@ -431,6 +456,11 @@ export function WrappedRodada() {
                 );
               })}
             </div>
+            {ehAdmin && votacaoAberta && (
+              <Button variante="secundario" carregando={encerrandoVotacao} onClick={aoEncerrarVotacao}>
+                Finalizar votação
+              </Button>
+            )}
             <div className="wrapped-stats-grid">
               <TabelaStory titulo="Artilharia" linhas={estatisticas?.artilharia} unidade="gols" />
               <TabelaStory titulo="Assistências" linhas={estatisticas?.assistencias} unidade="AST" />
@@ -459,6 +489,11 @@ export function WrappedRodada() {
         <Button variante="secundario" disabled={story === 0} onClick={() => { setErro(null); setStory((atual) => Math.max(0, atual - 1)); }}>
           Voltar
         </Button>
+        {ehAdmin && votacaoAberta && (
+          <Button variante="secundario" carregando={encerrandoVotacao} onClick={aoEncerrarVotacao}>
+            Finalizar votação
+          </Button>
+        )}
         {story < NOMES_STORIES.length - 1 ? (
           <Button onClick={proximaStory}>Próximo story</Button>
         ) : (

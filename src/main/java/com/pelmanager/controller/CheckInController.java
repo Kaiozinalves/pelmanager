@@ -25,6 +25,13 @@ public class CheckInController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @DeleteMapping("/rodada/{rodadaId}/usuario/{usuarioId}")
+    public ResponseEntity<List<ParticipanteCheckInResponseDTO>> cancelarPresenca(
+            @PathVariable Long rodadaId,
+            @PathVariable Long usuarioId) {
+        return ResponseEntity.ok(checkInService.cancelarCheckIn(rodadaId, usuarioId));
+    }
+
     @PostMapping("/rodada/{rodadaId}/confirmar-todos")
     public ResponseEntity<List<ParticipanteCheckInResponseDTO>> confirmarTodos(
             @PathVariable Long rodadaId,

@@ -9,6 +9,7 @@ import com.pelmanager.dto.request.UsuarioUpdateRequestDTO;
 import com.pelmanager.entity.Endereco;
 import com.pelmanager.entity.Usuario;
 import com.pelmanager.exception.EmailJaCadastradoException;
+import com.pelmanager.exception.RecursoNaoEncontradoException;
 import com.pelmanager.exception.RequisicaoInvalidaException;
 import com.pelmanager.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
@@ -46,10 +47,10 @@ public class UsuarioService {
 
     public UsuarioResponseDTO autenticar(LoginRequestDTO dto) {
         Usuario usuario = usuarioRepository.findByEmail(dto.email())
-                .orElseThrow(() -> new RuntimeException("E-mail não cadastrado."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("E-mail não cadastrado."));
 
         if (!usuario.getSenha().equals(dto.senha())) {
-            throw new RuntimeException("Senha incorreta.");
+            throw new RequisicaoInvalidaException("Senha incorreta.");
         }
 
         return paraDTO(usuario, true);
@@ -57,14 +58,14 @@ public class UsuarioService {
 
     public UsuarioResponseDTO buscarPorId(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado."));
         return paraDTO(usuario, false);
     }
 
     @Transactional
     public UsuarioResponseDTO atualizarUsuario(Long id, UsuarioUpdateRequestDTO dto) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado."));
 
         usuario.setNome(dto.nome());
         usuario.setApelido(dto.apelido());

@@ -10,6 +10,8 @@ import com.pelmanager.entity.Time;
 import com.pelmanager.entity.Usuario;
 import com.pelmanager.entity.enums.Posicao;
 import com.pelmanager.entity.enums.StatusCheckIn;
+import com.pelmanager.exception.OperacaoInvalidaException;
+import com.pelmanager.exception.RodadaNaoEncontradaException;
 import com.pelmanager.repository.AvaliacaoRepository;
 import com.pelmanager.repository.CheckInRepository;
 import com.pelmanager.repository.RodadaRepository;
@@ -32,23 +34,30 @@ public class SorteioService {
     private final AvaliacaoRepository avaliacaoRepository;
     private final RodadaRepository rodadaRepository;
     private final TimeRepository timeRepository;
+    private final PermissaoService permissaoService;
 
     public SorteioService(CheckInRepository checkInRepository, AvaliacaoRepository avaliacaoRepository,
-                          RodadaRepository rodadaRepository, TimeRepository timeRepository) {
+                          RodadaRepository rodadaRepository, TimeRepository timeRepository,
+                          PermissaoService permissaoService) {
         this.checkInRepository = checkInRepository;
         this.avaliacaoRepository = avaliacaoRepository;
         this.rodadaRepository = rodadaRepository;
         this.timeRepository = timeRepository;
+        this.permissaoService = permissaoService;
     }
 
     @Transactional
-    public SorteioResponseDTO sortearTimes(Long rodadaId) {
+    public SorteioResponseDTO sortearTimes(Long rodadaId, Long usuarioId) {
         Rodada rodada = rodadaRepository.findById(rodadaId)
-                .orElseThrow(() -> new RuntimeException("Rodada não encontrada."));
+                .orElseThrow(() -> new RodadaNaoEncontradaException(rodadaId));
+
+        permissaoService.exigirAdmin(usuarioId, rodada.getGrupo());
 
         List<CheckIn> confirmados = buscarJogadoresConfirmados(rodadaId);
         int numTimes = calcularNumeroDeTimes(confirmados.size());
         validarQuantidadeMinimaDeGoleiros(confirmados, numTimes);
+
+        limparSorteioAnterior(rodadaId);
 
         List<JogadorSorteioDTO> ranqueados = calcularOverallDosJogadores(confirmados);
         List<BalanceadorDeTimes.Jogador> jogadores = ranqueados.stream()
@@ -91,13 +100,17 @@ public class SorteioService {
 
 
     @Transactional
-    public SorteioResponseDTO sortearTimesAleatorio(Long rodadaId) {
+    public SorteioResponseDTO sortearTimesAleatorio(Long rodadaId, Long usuarioId) {
         Rodada rodada = rodadaRepository.findById(rodadaId)
-                .orElseThrow(() -> new RuntimeException("Rodada não encontrada."));
+                .orElseThrow(() -> new RodadaNaoEncontradaException(rodadaId));
+
+        permissaoService.exigirAdmin(usuarioId, rodada.getGrupo());
 
         List<CheckIn> confirmados = buscarJogadoresConfirmados(rodadaId);
         int numTimes = calcularNumeroDeTimes(confirmados.size());
         validarQuantidadeMinimaDeGoleiros(confirmados, numTimes);
+
+        limparSorteioAnterior(rodadaId);
 
         // Separa quem pode jogar de goleiro do resto
         List<CheckIn> goleiros = new ArrayList<>(confirmados.stream()
@@ -188,7 +201,7 @@ public class SorteioService {
 
     private int calcularNumeroDeTimes(int totalConfirmados) {
         if (totalConfirmados < 10) {
-            throw new RuntimeException("Mínimo de 10 jogadores confirmados para formar 2 times.");
+            throw new OperacaoInvalidaException("Mínimo de 10 jogadores confirmados para formar 2 times.");
         }
         return totalConfirmados / 5;
     }
@@ -203,7 +216,7 @@ public class SorteioService {
                 .count();
 
         if (goleirosDisponiveis < goleirosMinimos) {
-            throw new IllegalStateException(
+            throw new OperacaoInvalidaException(
                     "Para sortear os times, é necessário pelo menos " + goleirosMinimos
                             + " jogadores com posição primária ou secundária de GOLEIRO."
             );
