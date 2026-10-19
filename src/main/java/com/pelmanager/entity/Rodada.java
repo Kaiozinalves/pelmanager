@@ -5,6 +5,7 @@ import com.pelmanager.entity.enums.StatusRodada;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -24,6 +25,10 @@ public class Rodada {
     @ManyToOne
     @JoinColumn(name = "grupo_id", nullable = false)
     private GrupoPelada grupo;
+
+    private BigDecimal valorPorParticipante;
+
+    private LocalDateTime dataCheckInFechado;
 
     LocalDate dataRodada;
     LocalTime horaRodada;

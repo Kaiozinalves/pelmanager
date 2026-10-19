@@ -4,6 +4,7 @@ import com.pelmanager.entity.enums.CategoriaVoto;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.List;
@@ -33,6 +34,16 @@ public class GrupoPelada {
 
     private Boolean publica = true;
 
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean sistemaPagementoAtivo = false;
+
+    // Valor total da pelada
+    private BigDecimal valorTotalPelada;
+
+    private String chavePixGerente;
+
+
+
     // Configuração da votação de fim de rodada. O "bagre" nasce desligado: o rótulo
     // pode ser engraçado entre amigos, mas constrangedor em outros contextos.
     @Column(name = "categoria_melhor_ativa", nullable = false, columnDefinition = "boolean default true")
@@ -57,6 +68,18 @@ public class GrupoPelada {
         if (categoriaAssistenteAtiva) ativas.add(CategoriaVoto.MELHOR_ASSISTENTE);
         if (categoriaBagreAtiva) ativas.add(CategoriaVoto.BAGRE);
         return ativas;
+    }
+
+    // Calcula valor por pessoa
+    public BigDecimal calcularValorPorPessoa(int quantidade) {
+        if (!sistemaPagementoAtivo || valorTotalPelada == null || quantidade <= 0) {
+            return BigDecimal.ZERO;
+        }
+        return valorTotalPelada.divide(
+                BigDecimal.valueOf(quantidade),
+                2,
+                java.math.RoundingMode.HALF_UP
+        );
     }
 
     public boolean ehPublica() {
