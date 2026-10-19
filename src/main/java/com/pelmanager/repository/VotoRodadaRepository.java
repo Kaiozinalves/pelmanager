@@ -16,10 +16,7 @@ public interface VotoRodadaRepository extends JpaRepository<VotoRodada, Long> {
 
     List<VotoRodada> findByRodadaIdInAndCategoria(List<Long> rodadaIds, CategoriaVoto categoria);
 
-    /**
-     * Apuração: [categoria, votadoId, quantidade de votos]. Só conta votos de quem tem
-     * check-in CONFIRMADO na rodada. Não devolve (nem consulta) a identidade do votante.
-     */
+
     @Query("""
             select v.categoria, v.votado.id, count(v)
             from VotoRodada v

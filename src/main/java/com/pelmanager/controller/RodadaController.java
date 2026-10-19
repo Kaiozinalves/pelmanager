@@ -38,21 +38,18 @@ public class RodadaController {
         return ResponseEntity.ok(service.removerEnderecoAlternativo(id, usuarioId));
     }
 
-    // Início manual da partida (somente admin do grupo).
     @PatchMapping("/{id}/iniciar")
     public ResponseEntity<RodadaStatusResponseDTO> iniciarRodada(@PathVariable("id") Long id,
                                                                  @RequestParam("usuarioId") Long usuarioId) {
         return ResponseEntity.ok(service.iniciarRodada(id, usuarioId));
     }
 
-    // Fim manual da partida (somente admin do grupo). Abre a votação.
     @PatchMapping("/{id}/finalizar")
     public ResponseEntity<RodadaStatusResponseDTO> finalizarRodada(@PathVariable("id") Long id,
                                                                    @RequestParam("usuarioId") Long usuarioId) {
         return ResponseEntity.ok(service.finalizarRodada(id, usuarioId));
     }
 
-    // Encerra a votação antes do prazo (somente admin do grupo).
     @PatchMapping("/{id}/votacao/encerrar")
     public ResponseEntity<RodadaStatusResponseDTO> encerrarVotacao(@PathVariable("id") Long id,
                                                                    @RequestParam("usuarioId") Long usuarioId) {

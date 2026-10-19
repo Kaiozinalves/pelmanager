@@ -12,12 +12,7 @@ import com.pelmanager.repository.ParticipanteRepository;
 import com.pelmanager.repository.UsuarioRepository;
 import org.springframework.stereotype.Component;
 
-/**
- * Regras de permissão aplicadas no servidor.
- * Observação: o backend ainda não tem autenticação (JWT), então o "usuarioId" que chega
- * na requisição é confiado como identidade. Quando houver login real, basta trocar a
- * origem desse id (token) sem mexer nas regras abaixo.
- */
+
 @Component
 public class PermissaoService {
 

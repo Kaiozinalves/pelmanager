@@ -64,7 +64,6 @@ public class RodadaService {
         novaRodada.setHoraRodada(dto.horario());
         novaRodada.setStatusRodada(StatusRodada.AGENDADA);
 
-        // Verifica se foi passado um endereço alternativo (objeto ou ID)
         if (temEnderecoPreenchido(dto.enderecoAlternativo())) {
             Endereco novoEndereco = enderecoService.cadastrarEndereco(dto.enderecoAlternativo());
             novaRodada.setEnderecoAlternativo(novoEndereco);
@@ -101,7 +100,6 @@ public class RodadaService {
         return paraRodadaDTO(rodadaRepository.save(rodada));
     }
 
-    // Início manual da partida (admin). Encerra o período de check-in, que só vale enquanto AGENDADA.
     @Transactional
     public RodadaStatusResponseDTO iniciarRodada(Long rodadaId, Long usuarioId) {
         Rodada rodada = buscarRodada(rodadaId);
@@ -117,13 +115,11 @@ public class RodadaService {
         rodada.setDataCheckInFechado(agora);
         Rodada salva = rodadaRepository.save(rodada);
 
-        // Gera automaticamente os pagamentos da rodada ao encerrar o check-in
         pagamentoService.criarPagamentoAoFinalizarCheckIn(rodadaId);
 
         return paraStatusDTO(salva);
     }
 
-    // Fim manual da partida (admin). Abre a votação com o prazo e as categorias configuradas no grupo.
     @Transactional
     public RodadaStatusResponseDTO finalizarRodada(Long rodadaId, Long usuarioId) {
         Rodada rodada = buscarRodada(rodadaId);
@@ -142,12 +138,10 @@ public class RodadaService {
         rodada.setStatusRodada(StatusRodada.FINALIZADA);
         rodada.setFinalizadaEm(agora);
         rodada.setVotacaoAte(agora.plusHours(grupo.getPrazoAvaliacaoHoras()));
-        // Snapshot: mudar a configuração do grupo depois não altera esta votação.
         rodada.setCategoriasVotacao(new HashSet<>(grupo.categoriasAtivas()));
         return paraStatusDTO(rodadaRepository.save(rodada));
     }
 
-    // Encerramento antecipado da votação (admin) — útil para testes e para fechar o resultado antes do prazo.
     @Transactional
     public RodadaStatusResponseDTO encerrarVotacao(Long rodadaId, Long usuarioId) {
         Rodada rodada = buscarRodada(rodadaId);

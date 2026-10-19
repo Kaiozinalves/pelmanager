@@ -18,7 +18,6 @@ public class VotacaoController {
         this.votacaoService = votacaoService;
     }
 
-    // Estado da votação para o usuário: o que falta votar, prazo e (quando liberado) resultado.
     @GetMapping("/votacao")
     public ResponseEntity<VotacaoResponseDTO> consultar(@PathVariable Long rodadaId,
                                                         @RequestParam Long usuarioId) {

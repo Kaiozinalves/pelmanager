@@ -79,27 +79,22 @@ public class ConfiguracaoPagamentoService {
 
         chave = chave.trim();
 
-        // CPF (com ou sem pontuação)
         if (chave.matches("\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}") || chave.matches("\\d{11}")) {
             return;
         }
 
-        // CNPJ (com ou sem pontuação)
         if (chave.matches("\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}") || chave.matches("\\d{14}")) {
             return;
         }
 
-        // E-mail
         if (chave.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             return;
         }
 
-        // Telefone (+55 11 99999-9999, (11) 99999-9999, +5511999999999, etc.)
         if (chave.matches("(\\+55\\s?)?(\\(?\\d{2}\\)?\\s?)?\\d{4,5}-?\\d{4}")) {
             return;
         }
 
-        // Chave aleatória (UUID)
         if (chave.matches("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")) {
             return;
         }

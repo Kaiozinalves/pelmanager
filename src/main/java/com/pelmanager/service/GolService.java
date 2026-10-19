@@ -24,13 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * Registro de gols e assistências de uma rodada.
- * - Registrar: admin do grupo ou jogador com check-in confirmado, com a rodada EM_ANDAMENTO
- *   (admin também pode registrar depois de finalizada, para ajustes).
- * - Corrigir/remover: somente admin do grupo (o "responsável").
- * Autor e assistente precisam ter check-in confirmado, estar no mesmo time e ser pessoas diferentes.
- */
+
 @Service
 public class GolService {
 

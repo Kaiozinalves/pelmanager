@@ -46,7 +46,6 @@ public class GrupoPeladaController {
         return ResponseEntity.ok(service.buscarDetalhes(id));
     }
 
-    // Categorias de votação ativas e prazo (somente admin do grupo).
     @PutMapping("/{id}/configuracao-avaliacao")
     public ResponseEntity<ConfiguracaoAvaliacaoDTO> atualizarConfiguracaoAvaliacao(
             @PathVariable Long id,

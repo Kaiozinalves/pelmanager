@@ -10,23 +10,17 @@ import java.util.Random;
 
 public final class BalanceadorDeTimes {
 
-    // ===================== TIPOS DE ENTRADA E SAÍDA =====================
 
-    // Um jogador como o algoritmo enxerga: só id, nota e posições.
     public record Jogador(Long id, double nota, Posicao primaria, Posicao secundaria) {}
 
-    // Um jogador já colocado numa posição do time, com o "custo" dessa escolha.
     public record Escalacao(Jogador jogador, Posicao posicaoEscalada, int custoPosicao) {
         public boolean foraDePosicao() { return custoPosicao > 0; }
     }
 
-    // Um time pronto: lista de escalações, nota média e custo de posição do time.
     public record TimeMontado(List<Escalacao> escalacoes, double notaMedia, int custoPosicao) {}
 
-    // Resultado final do sorteio.
     public record Resultado(List<TimeMontado> times, double custoTotal, double desvioNotas) {}
 
-    // ===================== PARÂMETROS AJUSTÁVEIS =====================
 
     static final double PESO_POSICAO = 1.0;
     static final double PESO_NOTA = 60.0;
@@ -51,7 +45,6 @@ public final class BalanceadorDeTimes {
     public BalanceadorDeTimes(Random random) { this.random = random; }
     public BalanceadorDeTimes() { this(new Random()); }
 
-    // ===================== REGRAS DE POSIÇÃO =====================
 
     public static Posicao[] formacao(int k) {
         Posicao[] slots = new Posicao[k];
@@ -89,7 +82,6 @@ public final class BalanceadorDeTimes {
         return CUSTO_BASE_FORA + menorDistancia;
     }
 
-    // ===================== MÉTODO PRINCIPAL =====================
 
     public Resultado sortear(List<Jogador> jogadores, int jogadoresPorTime) {
         int n = jogadores.size();
@@ -116,7 +108,6 @@ public final class BalanceadorDeTimes {
         return ctx.montarResultado(escolhida);
     }
 
-    // ===================== DADOS PRÉ-CALCULADOS =====================
 
     private static final class Contexto {
         final List<Jogador> jogadores;

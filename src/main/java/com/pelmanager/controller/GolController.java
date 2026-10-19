@@ -30,7 +30,6 @@ public class GolController {
         return ResponseEntity.ok(golService.listar(rodadaId));
     }
 
-    // Correção de autor/assistente (somente admin do grupo).
     @PutMapping("/{golId}")
     public ResponseEntity<GolResponseDTO> corrigir(@PathVariable Long rodadaId,
                                                    @PathVariable Long golId,
@@ -38,7 +37,6 @@ public class GolController {
         return ResponseEntity.ok(golService.corrigir(rodadaId, golId, dto));
     }
 
-    // Remoção de um gol lançado por engano (somente admin do grupo).
     @DeleteMapping("/{golId}")
     public ResponseEntity<Void> remover(@PathVariable Long rodadaId,
                                         @PathVariable Long golId,

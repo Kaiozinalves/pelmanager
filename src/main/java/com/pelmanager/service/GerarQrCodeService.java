@@ -74,15 +74,12 @@ public class GerarQrCodeService {
     }
 
     private String normalizarChavePix(String chave) {
-        // Se for CPF com pontuação, remove pontos e traço
         if (chave.matches("\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}")) {
             return chave.replaceAll("\\D", "");
         }
-        // Se for CNPJ com pontuação, remove pontuação
         if (chave.matches("\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}")) {
             return chave.replaceAll("\\D", "");
         }
-        // Se for telefone formatado, normaliza para +55DDDNUMERO
         if (chave.matches("(\\+55\\s?)?(\\(?\\d{2}\\)?\\s?)\\d{4,5}-?\\d{4}")) {
             String digitos = chave.replaceAll("\\D", "");
             if (digitos.startsWith("55") && (digitos.length() == 12 || digitos.length() == 13)) {

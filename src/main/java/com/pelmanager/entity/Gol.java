@@ -6,11 +6,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-/**
- * Evento de gol de uma rodada. A assistência é um atributo opcional do gol
- * (não existe assistência sem gol), então artilharia = gols por autor e
- * assistências = gols por assistente.
- */
+
 @Entity
 @Table(name = "gols_rodada")
 @Getter

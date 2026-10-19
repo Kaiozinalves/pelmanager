@@ -175,10 +175,7 @@ public class VotacaoService {
         return ABERTA;
     }
 
-    /**
-     * Critério de empate: vence quem tiver mais votos; empatados no topo dividem a vitória
-     * (empate = true). Ranking desempata por nome só para ordenar a exibição.
-     */
+
     private ResultadoCategoriaDTO montarResultado(Map<Long, Long> contagem,
                                                   Map<Long, Usuario> usuarios,
                                                   int totalVotos) {
