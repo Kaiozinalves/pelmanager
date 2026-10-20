@@ -67,6 +67,7 @@ public class CheckInService {
         }
 
         Optional<CheckIn> existenteOpt = checkInRepository.findByRodadaIdAndUsuarioId(rodada1.getId(), usuario.getId());
+        CheckIn checkInSalvo;
         if (existenteOpt.isPresent()) {
             CheckIn existente = existenteOpt.get();
             if (existente.getStatus() == StatusCheckIn.CONFIRMADO) {
@@ -74,24 +75,17 @@ public class CheckInService {
             }
             existente.setStatus(StatusCheckIn.CONFIRMADO);
             existente.setDataHoraCheckin(LocalDateTime.now());
-            CheckIn checkInSalvo = checkInRepository.save(existente);
-            return new CheckInResponseDTO(
-                    checkInSalvo.getId(),
-                    rodada1.getId(),
-                    usuario.getId(),
-                    usuario.getNome(),
-                    checkInSalvo.getDataHoraCheckin(),
-                    checkInSalvo.getStatus()
-            );
+            checkInSalvo = checkInRepository.save(existente);
+        } else {
+            CheckIn checkIn = new CheckIn();
+            checkIn.setRodada(rodada1);
+            checkIn.setUsuario(usuario);
+            checkIn.setDataHoraCheckin(LocalDateTime.now());
+            checkIn.setStatus(StatusCheckIn.CONFIRMADO);
+            checkInSalvo = checkInRepository.save(checkIn);
         }
 
-        CheckIn checkIn = new CheckIn();
-        checkIn.setRodada(rodada1);
-        checkIn.setUsuario(usuario);
-        checkIn.setDataHoraCheckin(LocalDateTime.now());
-        checkIn.setStatus(StatusCheckIn.CONFIRMADO);
-
-        CheckIn checkInSalvo = checkInRepository.save(checkIn);
+        pagamentoService.criarPagamentoAoFinalizarCheckIn(rodada1.getId());
 
         return new CheckInResponseDTO(
                 checkInSalvo.getId(),
@@ -172,6 +166,8 @@ public class CheckInService {
             checkIn.setStatus(StatusCheckIn.CONFIRMADO);
             checkInRepository.save(checkIn);
         }
+
+        pagamentoService.criarPagamentoAoFinalizarCheckIn(rodadaId);
 
         return listarStatusDaRodada(rodadaId);
     }

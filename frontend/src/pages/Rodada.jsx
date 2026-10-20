@@ -269,7 +269,9 @@ export function Rodada() {
     setFazendoCheckin(true);
     try {
       await confirmarPresenca({ rodadaId: rodadaIdNum, usuarioId: usuario.id });
-      await Promise.all([carregarCheckins(), carregarPagamentos()]);
+      setQrCodePagamentoId(null);
+      setQrCodeDados(null);
+      await Promise.all([carregarCheckins(), carregarPagamentos(), carregarGrupo()]);
     } catch (err) {
       setErroCheckin(extrairMensagemErro(err, "Não foi possível confirmar sua presença agora."));
     } finally {
@@ -282,6 +284,8 @@ export function Rodada() {
     setCancelandoCheckin(true);
     try {
       await cancelarPresenca({ rodadaId: rodadaIdNum, usuarioId: usuario.id });
+      setQrCodePagamentoId(null);
+      setQrCodeDados(null);
       await Promise.all([carregarCheckins(), carregarPagamentos(), carregarGrupo()]);
     } catch (err) {
       setErroCheckin(extrairMensagemErro(err, "Não foi possível cancelar sua presença agora."));
@@ -295,7 +299,9 @@ export function Rodada() {
     setConfirmandoTodos(true);
     try {
       await confirmarTodos({ rodadaId: rodadaIdNum, usuarioId: usuario.id });
-      await Promise.all([carregarCheckins(), carregarPagamentos()]);
+      setQrCodePagamentoId(null);
+      setQrCodeDados(null);
+      await Promise.all([carregarCheckins(), carregarPagamentos(), carregarGrupo()]);
     } catch (err) {
       setErroCheckin(extrairMensagemErro(err, "Não foi possível confirmar todos os membros agora."));
     } finally {
